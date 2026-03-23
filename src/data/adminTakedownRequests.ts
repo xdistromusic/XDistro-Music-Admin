@@ -1,0 +1,58 @@
+import { AdminTakedownRequest } from "@/types/admin";
+
+export const mockAdminTakedownRequests: AdminTakedownRequest[] = [
+  {
+    id: 1,
+    artistName: "John Doe",
+    artistEmail: "john.doe@email.com",
+    releaseTitle: "Summer Vibes",
+    releaseId: "REL001",
+    requestDate: "2024-03-12 14:30",
+    status: "Pending",
+  },
+  {
+    id: 2,
+    artistName: "Jane Smith",
+    artistEmail: "jane.smith@email.com",
+    releaseTitle: "Midnight Dreams EP",
+    releaseId: "REL002",
+    requestDate: "2024-03-11 09:15",
+    status: "Pending",
+  },
+  {
+    id: 3,
+    artistName: "Mike Wilson",
+    artistEmail: "mike.wilson@email.com",
+    releaseTitle: "Rock Anthem",
+    releaseId: "REL003",
+    requestDate: "2024-03-10 16:45",
+    status: "Completed",
+  },
+  {
+    id: 4,
+    artistName: "Sarah Johnson",
+    artistEmail: "sarah.johnson@email.com",
+    releaseTitle: "Acoustic Sessions",
+    releaseId: "REL004",
+    requestDate: "2024-03-09 11:20",
+    status: "Pending",
+  },
+  {
+    id: 5,
+    artistName: "David Brown",
+    artistEmail: "david.brown@email.com",
+    releaseTitle: "Hip Hop Chronicles",
+    releaseId: "REL005",
+    requestDate: "2024-03-08 13:30",
+    status: "Pending",
+  },
+  {
+    id: 6,
+    artistName: "Emma Davis",
+    artistEmail: "emma.davis@email.com",
+    releaseTitle: "Love Songs Collection",
+    releaseId: "REL006",
+    requestDate: "2024-03-07 10:15",
+    status: "Pending",
+  },
+];

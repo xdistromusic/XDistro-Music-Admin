@@ -1,0 +1,88 @@
+import { AdminArtist } from "@/types/admin";
+
+export const mockAdminArtists: AdminArtist[] = [
+  {
+    id: 1,
+    artistName: "John Doe",
+    primaryGenre: "Pop",
+    artistBio:
+      "John Doe is a talented pop artist from Los Angeles, known for his catchy melodies and heartfelt lyrics.",
+    spotifyUrl: "https://open.spotify.com/artist/johndoe",
+    country: "United States",
+    recordLabel: "Independent",
+    addedBy: "john.doe@email.com",
+    addedDate: "2024-01-15",
+    releases: 5,
+    status: "Active",
+  },
+  {
+    id: 2,
+    artistName: "Jane Smith",
+    primaryGenre: "Electronic",
+    artistBio:
+      "Jane Smith is an electronic music producer and DJ from London, known for ambient and downtempo soundscapes.",
+    spotifyUrl: "https://open.spotify.com/artist/janesmith",
+    country: "United Kingdom",
+    recordLabel: "Neon Records",
+    addedBy: "jane.smith@email.com",
+    addedDate: "2024-02-20",
+    releases: 12,
+    status: "Active",
+  },
+  {
+    id: 3,
+    artistName: "Mike Wilson",
+    primaryGenre: "Rock",
+    artistBio:
+      "Mike Wilson is a rock guitarist and songwriter from Toronto with modern production influences.",
+    spotifyUrl: "https://open.spotify.com/artist/mikewilson",
+    country: "Canada",
+    recordLabel: "Rock Solid Records",
+    addedBy: "mike.wilson@email.com",
+    addedDate: "2023-11-05",
+    releases: 8,
+    status: "Active",
+  },
+  {
+    id: 4,
+    artistName: "Sarah Johnson",
+    primaryGenre: "Folk",
+    artistBio:
+      "Sarah Johnson is a folk singer-songwriter from Nashville focused on acoustic storytelling.",
+    spotifyUrl: "https://open.spotify.com/artist/sarahjohnson",
+    country: "United States",
+    recordLabel: "Folk Tales Music",
+    addedBy: "sarah.johnson@email.com",
+    addedDate: "2024-03-01",
+    releases: 3,
+    status: "Active",
+  },
+  {
+    id: 5,
+    artistName: "David Brown",
+    primaryGenre: "Hip-Hop",
+    artistBio:
+      "David Brown is a hip-hop artist and producer from Atlanta with socially grounded songwriting.",
+    spotifyUrl: "https://open.spotify.com/artist/davidbrown",
+    country: "United States",
+    recordLabel: "Urban Beats",
+    addedBy: "david.brown@email.com",
+    addedDate: "2023-12-10",
+    releases: 15,
+    status: "Active",
+  },
+  {
+    id: 6,
+    artistName: "Emma Davis",
+    primaryGenre: "R&B",
+    artistBio:
+      "Emma Davis is an R&B vocalist from Chicago blending soulful vocals with contemporary production.",
+    spotifyUrl: "https://open.spotify.com/artist/emmadavis",
+    country: "United States",
+    recordLabel: "Soul Records",
+    addedBy: "emma.davis@email.com",
+    addedDate: "2024-02-28",
+    releases: 7,
+    status: "Active",
+  },
+];
