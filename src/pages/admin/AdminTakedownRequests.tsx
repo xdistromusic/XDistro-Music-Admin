@@ -63,11 +63,16 @@ const AdminTakedownRequests = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <AdminPageLayout title="Takedown Requests" subtitle="Manage user requests to remove releases from distribution platforms">
+        <AdminPageLoader message="Loading takedown requests..." />
+      </AdminPageLayout>
+    );
+  }
+
   return (
     <AdminPageLayout title="Takedown Requests" subtitle="Manage user requests to remove releases from distribution platforms">
-
-        {isLoading && <AdminPageLoader message="Loading takedown requests..." />}
-
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <Card>

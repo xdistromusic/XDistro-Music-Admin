@@ -72,11 +72,16 @@ USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2024-02`;
     }
   };
 
+  if (isLoading) {
+    return (
+      <AdminPageLayout title="Royalties Management" subtitle="Upload monthly royalty CSV files and manage distributions">
+        <AdminPageLoader message="Loading royalties data..." />
+      </AdminPageLayout>
+    );
+  }
+
   return (
     <AdminPageLayout title="Royalties Management" subtitle="Upload monthly royalty CSV files and manage distributions">
-
-        {isLoading && <AdminPageLoader message="Loading royalties data..." />}
-
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>

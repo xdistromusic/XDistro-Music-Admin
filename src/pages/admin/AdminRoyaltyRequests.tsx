@@ -73,11 +73,16 @@ const AdminRoyaltyRequests = () => {
     .filter(r => r.status === 'Pending')
     .reduce((sum, r) => sum + r.amount, 0);
 
+  if (isLoading) {
+    return (
+      <AdminPageLayout title="Royalty Withdrawal Requests" subtitle="Review and process royalty withdrawal requests">
+        <AdminPageLoader message="Loading royalty requests..." />
+      </AdminPageLayout>
+    );
+  }
+
   return (
     <AdminPageLayout title="Royalty Withdrawal Requests" subtitle="Review and process royalty withdrawal requests">
-
-      {isLoading && <AdminPageLoader message="Loading royalty requests..." />}
-
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>

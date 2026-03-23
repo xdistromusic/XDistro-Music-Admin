@@ -129,13 +129,22 @@ const AdminReleases = () => {
     setSelectedReleaseId(null);
   };
 
+  if (isLoading) {
+    return (
+      <AdminPageLayout
+        title="Releases Management"
+        subtitle="Review and manage all releases"
+      >
+        <AdminPageLoader message="Loading releases..." />
+      </AdminPageLayout>
+    );
+  }
+
   return (
     <AdminPageLayout
       title="Releases Management"
       subtitle="Review and manage all releases"
     >
-      {isLoading && <AdminPageLoader message="Loading releases..." />}
-
       <Card className="mb-6">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">

@@ -148,11 +148,16 @@ const AdminReportRequests = () => {
   // Get unique periods for filter
   const uniquePeriods = [...new Set(reportRequests.map(r => r.reportPeriod))].sort().reverse();
 
+  if (isLoading) {
+    return (
+      <AdminPageLayout title="Royalty Report Requests" subtitle="Manage user requests for monthly earnings reports">
+        <AdminPageLoader message="Loading report requests..." />
+      </AdminPageLayout>
+    );
+  }
+
   return (
     <AdminPageLayout title="Royalty Report Requests" subtitle="Manage user requests for monthly earnings reports">
-
-        {isLoading && <AdminPageLoader message="Loading report requests..." />}
-
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <Card>

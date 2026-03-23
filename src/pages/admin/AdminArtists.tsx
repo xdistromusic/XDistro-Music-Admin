@@ -103,11 +103,16 @@ const AdminArtists = () => {
   const uniqueCountries = [...new Set(artists.map(a => a.country))].sort();
   const selectedArtist = artists.find((artist) => artist.id === selectedArtistId) || null;
 
+  if (isLoading) {
+    return (
+      <AdminPageLayout title="Artists Management" subtitle="Manage all artists added by users to their accounts">
+        <AdminPageLoader message="Loading artists..." />
+      </AdminPageLayout>
+    );
+  }
+
   return (
     <AdminPageLayout title="Artists Management" subtitle="Manage all artists added by users to their accounts">
-
-        {isLoading && <AdminPageLoader message="Loading artists..." />}
-
         {/* Filters and Search */}
         <Card className="mb-6">
           <CardContent className="p-6">

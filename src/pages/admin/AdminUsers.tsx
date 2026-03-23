@@ -128,11 +128,17 @@ const AdminUsers = () => {
     
     toast.success(`Exported ${filteredUsers.length} users to CSV`);
   };
+  
+  if (isLoading) {
+    return (
+      <AdminPageLayout title="Users Management" subtitle="Manage all registered user accounts">
+        <AdminPageLoader message="Loading users..." />
+      </AdminPageLayout>
+    );
+  }
 
   return (
     <AdminPageLayout title="Users Management" subtitle="Manage all registered user accounts">
-      {isLoading && <AdminPageLoader message="Loading users..." />}
-
         {/* Filters and Search */}
         <Card className="mb-6">
           <CardContent className="p-6">
