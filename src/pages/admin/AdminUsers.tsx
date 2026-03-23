@@ -6,6 +6,7 @@ import { Search, Download, Eye, Trash2, Mail, MapPin } from "lucide-react";
 import { toast } from "@/lib/toast";
 import AdminPageLayout from "@/components/admin/AdminPageLayout";
 import AdminPageLoader from "@/components/admin/AdminPageLoader";
+import ActionConfirmationModal from "@/components/admin/ActionConfirmationModal";
 import UserDetailsModal from "@/components/admin/UserDetailsModal";
 import { AdminUserListItem, SubscriptionPlanName } from "@/types/admin";
 import {
@@ -22,6 +23,7 @@ const AdminUsers = () => {
   const [filterPlan, setFilterPlan] = useState<"all" | SubscriptionPlanName>("all");
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<AdminUserListItem | null>(null);
 
   const { data: users = [], isLoading } = useAdminUsers();
   const deleteUserMutation = useDeleteAdminUser();
@@ -59,11 +61,18 @@ const AdminUsers = () => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteUser = async (user: AdminUserListItem) => {
-    if (window.confirm(`Are you sure you want to delete ${user.firstName} ${user.lastName}? This action cannot be undone.`)) {
-      await deleteUserMutation.mutateAsync(user.id);
-      toast.success(`User ${user.firstName} ${user.lastName} has been deleted`);
+  const handleDeleteUser = (user: AdminUserListItem) => {
+    setUserToDelete(user);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) {
+      return;
     }
+
+    await deleteUserMutation.mutateAsync(userToDelete.id);
+    toast.success(`User ${userToDelete.firstName} ${userToDelete.lastName} has been deleted`);
+    setUserToDelete(null);
   };
 
   const handleStatusChange = async (userId: number, newStatus: string) => {
@@ -318,6 +327,24 @@ const AdminUsers = () => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onStatusUpdate={(userId, newStatus) => void handleStatusChange(userId, newStatus)}
+      />
+
+      <ActionConfirmationModal
+        open={!!userToDelete}
+        onOpenChange={(open) => {
+          if (!open) {
+            setUserToDelete(null);
+          }
+        }}
+        title="Delete User"
+        description={
+          userToDelete
+            ? `Are you sure you want to delete ${userToDelete.firstName} ${userToDelete.lastName}? This action cannot be undone.`
+            : ""
+        }
+        confirmLabel="Delete"
+        onConfirm={confirmDeleteUser}
+        isConfirming={deleteUserMutation.isPending}
       />
     </AdminPageLayout>
   );

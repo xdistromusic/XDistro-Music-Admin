@@ -7,6 +7,7 @@ import { Search, Eye, Trash2, Music, MapPin, Building } from "lucide-react";
 import { toast } from "@/lib/toast";
 import AdminPageLayout from "@/components/admin/AdminPageLayout";
 import AdminPageLoader from "@/components/admin/AdminPageLoader";
+import ActionConfirmationModal from "@/components/admin/ActionConfirmationModal";
 import ArtistDetailsModal from "@/components/admin/ArtistDetailsModal";
 import { AdminArtist } from "@/types/admin";
 import {
@@ -22,6 +23,7 @@ const AdminArtists = () => {
   const [filterCountry, setFilterCountry] = useState("all");
   const [selectedArtistId, setSelectedArtistId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [artistToDelete, setArtistToDelete] = useState<AdminArtist | null>(null);
 
   const { data: artists = [], isLoading } = useAdminArtists();
   const deleteArtistMutation = useDeleteAdminArtist();
@@ -64,11 +66,18 @@ const AdminArtists = () => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteArtist = async (artist: AdminArtist) => {
-    if (window.confirm(`Are you sure you want to delete artist "${artist.artistName}"? This action cannot be undone.`)) {
-      await deleteArtistMutation.mutateAsync(artist.id);
-      toast.success(`Artist "${artist.artistName}" has been deleted`);
+  const handleDeleteArtist = (artist: AdminArtist) => {
+    setArtistToDelete(artist);
+  };
+
+  const confirmDeleteArtist = async () => {
+    if (!artistToDelete) {
+      return;
     }
+
+    await deleteArtistMutation.mutateAsync(artistToDelete.id);
+    toast.success(`Artist "${artistToDelete.artistName}" has been deleted`);
+    setArtistToDelete(null);
   };
 
   const handleStatusChange = async (artistId: number, newStatus: string) => {
@@ -263,6 +272,24 @@ const AdminArtists = () => {
         onClose={handleCloseModal}
         onStatusUpdate={(artistId, newStatus) => void handleStatusChange(artistId, newStatus)}
         onSaveArtist={(artist) => handleSaveArtist(artist)}
+      />
+
+      <ActionConfirmationModal
+        open={!!artistToDelete}
+        onOpenChange={(open) => {
+          if (!open) {
+            setArtistToDelete(null);
+          }
+        }}
+        title="Delete Artist"
+        description={
+          artistToDelete
+            ? `Are you sure you want to delete artist "${artistToDelete.artistName}"? This action cannot be undone.`
+            : ""
+        }
+        confirmLabel="Delete"
+        onConfirm={confirmDeleteArtist}
+        isConfirming={deleteArtistMutation.isPending}
       />
     </AdminPageLayout>
   );

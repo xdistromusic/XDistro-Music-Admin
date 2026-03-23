@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import AdminNavbar from "@/components/admin/AdminNavbar";
 import AdminFooter from "@/components/admin/AdminFooter";
 import StaffMemberFormModal from "@/components/admin/StaffMemberFormModal";
+import ActionConfirmationModal from "@/components/admin/ActionConfirmationModal";
 import { useAuth } from "@/hooks/useAuth";
 
 interface StaffMember {
@@ -31,6 +32,7 @@ const AdminSettings = () => {
   const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [selectedStaffMember, setSelectedStaffMember] = useState<StaffMember | null>(null);
+  const [staffMemberToRemove, setStaffMemberToRemove] = useState<StaffMember | null>(null);
   const { user } = useAuth();
 
   // User profile form state
@@ -156,10 +158,17 @@ const AdminSettings = () => {
   };
 
   const handleRemoveStaffMember = (member: StaffMember) => {
-    if (window.confirm(`Are you sure you want to remove ${member.name} from the staff? This action cannot be undone.`)) {
-      setStaffMembers(prev => prev.filter(staff => staff.id !== member.id));
-      toast.success(`${member.name} has been removed from staff`);
+    setStaffMemberToRemove(member);
+  };
+
+  const confirmRemoveStaffMember = () => {
+    if (!staffMemberToRemove) {
+      return;
     }
+
+    setStaffMembers(prev => prev.filter(staff => staff.id !== staffMemberToRemove.id));
+    toast.success(`${staffMemberToRemove.name} has been removed from staff`);
+    setStaffMemberToRemove(null);
   };
 
   const handleSaveStaffMember = (formData: StaffMemberFormData) => {
@@ -1364,6 +1373,23 @@ const AdminSettings = () => {
         onSubmit={handleSaveStaffMember}
         initialData={selectedStaffMember}
         mode={modalMode}
+      />
+
+      <ActionConfirmationModal
+        open={!!staffMemberToRemove}
+        onOpenChange={(open) => {
+          if (!open) {
+            setStaffMemberToRemove(null);
+          }
+        }}
+        title="Remove Staff Member"
+        description={
+          staffMemberToRemove
+            ? `Are you sure you want to remove ${staffMemberToRemove.name} from the staff? This action cannot be undone.`
+            : ""
+        }
+        confirmLabel="Remove"
+        onConfirm={confirmRemoveStaffMember}
       />
     </div>         
   );
