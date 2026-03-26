@@ -53,9 +53,15 @@
     @apply border-border;
   }
 
+  html {
+    /* Always reserve the scrollbar gutter so the layout never shifts when
+       content height changes (e.g. on page load or data fetch). */
+    scrollbar-gutter: stable;
+    overflow-y: scroll;
+  }
+
   body {
     @apply bg-background text-foreground font-sans;
-    overflow-y: auto;
   }
 }
 

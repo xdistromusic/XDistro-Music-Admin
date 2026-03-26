@@ -99,6 +99,22 @@ export const adminProtectedRoutes: AdminRouteConfig[] = [
 
 export const adminPrimaryNavRoutes = adminProtectedRoutes.filter((route) => route.showInPrimaryNav);
 
+/**
+ * Eagerly fetches all admin route JS chunks so the browser caches them before
+ * the user navigates. Call this immediately after a successful login.
+ */
+export const prefetchAdminRoutes = (): void => {
+  void import("@/pages/admin/AdminDashboard");
+  void import("@/pages/admin/AdminUsers");
+  void import("@/pages/admin/AdminReleases");
+  void import("@/pages/admin/AdminArtists");
+  void import("@/pages/admin/AdminRoyalties");
+  void import("@/pages/admin/AdminRoyaltyRequests");
+  void import("@/pages/admin/AdminReportRequests");
+  void import("@/pages/admin/AdminTakedownRequests");
+  void import("@/pages/admin/AdminSettings");
+};
+
 export const adminUserMenuRoutes = adminProtectedRoutes.filter((route) => route.showInUserMenu);
 
 export const getAdminPageTitle = (path: string): string => {

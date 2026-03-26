@@ -4,6 +4,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
 import { Suspense, useEffect } from "react";
+import AdminShellFallback from "@/components/admin/AdminShellFallback";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -38,7 +39,7 @@ const App = () => {
                   key={path}
                   path={path}
                   element={(
-                    <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading page...</div>}>
+                    <Suspense fallback={<AdminShellFallback />}>
                       <Component />
                     </Suspense>
                   )}

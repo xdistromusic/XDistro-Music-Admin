@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/lib/toast";
 import { useAuth } from "@/hooks/useAuth";
+import { prefetchAdminRoutes } from "@/config/adminRoutes";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -44,6 +45,7 @@ const Login = () => {
       const success = await login(data.email, data.password, data.rememberMe);
       
       if (success) {
+        prefetchAdminRoutes();
         toast.success("Welcome to the admin dashboard!");
         navigate(from, { replace: true });
       } else {
