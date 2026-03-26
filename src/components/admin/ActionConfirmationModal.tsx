@@ -30,7 +30,7 @@ const ActionConfirmationModal = ({
   isConfirming = false,
 }: ActionConfirmationModalProps) => {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

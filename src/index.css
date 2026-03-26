@@ -53,14 +53,12 @@
     @apply border-border;
   }
 
-  html {
-    /* Always reserve the scrollbar gutter so the layout never shifts when
-       content height changes (e.g. on page load or data fetch). */
-    scrollbar-gutter: stable;
-    overflow-y: scroll;
-  }
-
   body {
+    /* overflow-y:scroll on body (not html) so react-remove-scroll measures the
+       correct scrollbar width. When a modal opens it hides body's scrollbar and
+       adds padding-right equal to that exact width → zero net layout shift.
+       Having this on html instead causes a second scrollbar strip on modal open. */
+    overflow-y: scroll;
     @apply bg-background text-foreground font-sans;
   }
 }
