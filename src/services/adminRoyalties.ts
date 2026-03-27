@@ -145,7 +145,11 @@ const requestRoyaltyImport = async <T>(mode?: string, init?: RequestInit): Promi
     ...init,
     headers: {
       "Content-Type": "application/json",
-      ...(getAdminToken() ? { Authorization: `Bearer ${getAdminToken()}` } : {}),
+      ...(adminBackendConfig.supabaseAnonKey
+        ? { Authorization: `Bearer ${adminBackendConfig.supabaseAnonKey}`, apikey: adminBackendConfig.supabaseAnonKey }
+        : getAdminToken()
+        ? { Authorization: `Bearer ${getAdminToken()}` }
+        : {}),
       ...(init?.headers || {}),
     },
   });
@@ -231,4 +235,28 @@ export const uploadAdminRoyaltyFile = async (
     method: "POST",
     body: JSON.stringify({ fileName: input.file.name, period: input.period }),
   });
+};
+
+export const resyncAdminRoyaltyPeriod = async (period: string): Promise<string[]> => {
+  if (!/^\d{4}-\d{2}$/.test(period)) {
+    throw new Error("Please select a valid reporting month and year.");
+  }
+
+  if (isAdminDataDummyEnabled()) {
+    return [period];
+  }
+
+  if (!adminBackendConfig.royaltyImportUrl) {
+    throw new Error("VITE_ADMIN_ROYALTY_IMPORT_URL is not configured.");
+  }
+
+  const payload = await requestRoyaltyImport<{ data?: { periods?: string[] } }>(undefined, {
+    method: "POST",
+    body: JSON.stringify({
+      mode: "resync",
+      period,
+    }),
+  });
+
+  return payload.data?.periods ?? [period];
 };

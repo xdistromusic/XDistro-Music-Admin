@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getAdminRoyaltyStats,
   getAdminRoyaltyUploadHistory,
+  resyncAdminRoyaltyPeriod,
   uploadAdminRoyaltyFile,
 } from "@/services/adminRoyalties";
 import { AdminRoyaltyUploadInput } from "@/types/admin";
@@ -30,6 +31,18 @@ export const useUploadAdminRoyaltyFile = () => {
 
   return useMutation({
     mutationFn: (input: AdminRoyaltyUploadInput) => uploadAdminRoyaltyFile(input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: adminRoyaltyStatsQueryKey });
+      void queryClient.invalidateQueries({ queryKey: adminRoyaltyUploadHistoryQueryKey });
+    },
+  });
+};
+
+export const useResyncAdminRoyaltyPeriod = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (period: string) => resyncAdminRoyaltyPeriod(period),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: adminRoyaltyStatsQueryKey });
       void queryClient.invalidateQueries({ queryKey: adminRoyaltyUploadHistoryQueryKey });

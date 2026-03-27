@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import AdminPageLayout from "@/components/admin/AdminPageLayout";
 import AdminPageLoader from "@/components/admin/AdminPageLoader";
 import {
+  useResyncAdminRoyaltyPeriod,
   useAdminRoyaltyStats,
   useAdminRoyaltyUploadHistory,
   useUploadAdminRoyaltyFile,
@@ -17,7 +18,9 @@ const AdminRoyalties = () => {
   const { data: royaltyStats, isLoading: isStatsLoading } = useAdminRoyaltyStats();
   const { data: uploadHistory = [], isLoading: isUploadHistoryLoading } = useAdminRoyaltyUploadHistory();
   const uploadRoyaltyFileMutation = useUploadAdminRoyaltyFile();
+  const resyncRoyaltyPeriodMutation = useResyncAdminRoyaltyPeriod();
   const isProcessing = uploadRoyaltyFileMutation.isPending;
+  const isResyncing = resyncRoyaltyPeriodMutation.isPending;
   const isLoading = isStatsLoading || isUploadHistoryLoading;
 
   const today = new Date();
@@ -69,6 +72,21 @@ const AdminRoyalties = () => {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+    }
+  };
+
+  const handleResyncPeriod = async () => {
+    const period = `${selectedYear}-${selectedMonth}`;
+    if (!/^\d{4}-\d{2}$/.test(period)) {
+      toast.error("Please select a valid reporting month and year.");
+      return;
+    }
+
+    try {
+      const periods = await resyncRoyaltyPeriodMutation.mutateAsync(period);
+      toast.success(`Re-sync completed for ${periods.join(", ")}`);
+    } catch (error) {
+      toast.error((error as Error).message || "Failed to re-sync the selected period.");
     }
   };
 
@@ -246,6 +264,15 @@ USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2024-02`;
               <Button variant="outline" onClick={downloadTemplate} className="w-full">
                 <Download className="w-4 h-4 mr-2" />
                 Download CSV Template
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={handleResyncPeriod}
+                className="w-full"
+                disabled={isResyncing || isProcessing}
+              >
+                {isResyncing ? "Re-syncing..." : "Re-sync Selected Period"}
               </Button>
             </div>
           </div>

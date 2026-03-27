@@ -26,6 +26,7 @@ export const adminBackendConfig = {
   dataMode: resolveDataMode(),
   apiBaseUrl: getEnvValue("VITE_ADMIN_API_BASE_URL") || "/api/admin",
   royaltyImportUrl: getEnvValue("VITE_ADMIN_ROYALTY_IMPORT_URL") || "",
+  supabaseAnonKey: getEnvValue("VITE_SUPABASE_ANON_KEY") || "",
 };
 
 export const isAdminDummyAuthEnabled = (): boolean => adminBackendConfig.authMode === "dummy";
