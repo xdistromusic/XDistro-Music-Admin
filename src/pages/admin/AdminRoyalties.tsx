@@ -14,15 +14,28 @@ import {
 
 const AdminRoyalties = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const periodInputRef = useRef<HTMLInputElement>(null);
   const { data: royaltyStats, isLoading: isStatsLoading } = useAdminRoyaltyStats();
   const { data: uploadHistory = [], isLoading: isUploadHistoryLoading } = useAdminRoyaltyUploadHistory();
   const uploadRoyaltyFileMutation = useUploadAdminRoyaltyFile();
   const isProcessing = uploadRoyaltyFileMutation.isPending;
   const isLoading = isStatsLoading || isUploadHistoryLoading;
+  const defaultPeriod = new Date().toISOString().slice(0, 7);
 
   const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    const period = periodInputRef.current?.value || defaultPeriod;
+    if (!period) {
+      toast.error("Please select the report month before uploading.");
+      return;
+    }
+
+    if (!/^\d{4}-\d{2}$/.test(period)) {
+      toast.error("Reporting period must use YYYY-MM format.");
+      return;
+    }
 
     if (!file.name.toLowerCase().endsWith('.csv')) {
       toast.error("Please upload a CSV file");
@@ -31,8 +44,10 @@ const AdminRoyalties = () => {
 
 
     try {
-      const newUpload = await uploadRoyaltyFileMutation.mutateAsync({ fileName: file.name });
-      toast.success(`Successfully processed ${newUpload.recordsProcessed} royalty records`);
+      const newUpload = await uploadRoyaltyFileMutation.mutateAsync({ file, period });
+      toast.success(
+        `Successfully processed ${newUpload.recordsProcessed} royalty records for ${newUpload.period || period}`
+      );
 
     } catch {
       toast.error("Failed to process royalty file");
@@ -134,6 +149,23 @@ USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2024-02`;
             
             <div className="grid md:grid-cols-2 gap-6">
               <div>
+                <div className="mb-4">
+                  <label htmlFor="royalty-period" className="block text-sm font-medium text-gray-700 mb-2">
+                    Reporting Period
+                  </label>
+                  <input
+                    ref={periodInputRef}
+                    id="royalty-period"
+                    type="text"
+                    defaultValue={defaultPeriod}
+                    placeholder="YYYY-MM"
+                    inputMode="numeric"
+                    pattern="\\d{4}-\\d{2}"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-onerpm-orange"
+                    title="Enter reporting period as YYYY-MM"
+                  />
+                </div>
+
                 <div 
                   className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-onerpm-orange transition-colors"
                   onClick={() => fileInputRef.current?.click()}
@@ -175,9 +207,10 @@ USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2024-02`;
                 <h4 className="font-semibold text-gray-900">CSV File Requirements:</h4>
                 <ul className="space-y-2 text-gray-700 text-sm">
                   <li>• File must be in CSV format</li>
-                  <li>• Required columns: ISRC, Artist_Name, Track_Title, Royalty_Amount, Currency, Period</li>
+                  <li>• Required columns: ISRC, Track, Artists, Release, Label, Royalty Total</li>
+                  <li>• Select the reporting month before upload</li>
                   <li>• ISRC codes must match existing releases</li>
-                  <li>• Artist names must match registered user's artist</li>
+                  <li>• Artist and track names are stored for audit but matching is done by ISRC</li>
                   <li>• Royalty amounts should be in decimal format (e.g., 25.67)</li>
                 </ul>
                 
@@ -232,6 +265,9 @@ USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2024-02`;
                         <div className="flex items-center">
                           <FileText className="w-5 h-5 text-gray-400 mr-3" />
                           <div className="text-sm font-medium text-gray-900">{upload.fileName}</div>
+                          {upload.period && (
+                            <div className="text-xs text-gray-500">Period: {upload.period}</div>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -239,6 +275,11 @@ USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2024-02`;
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {upload.recordsProcessed.toLocaleString()}
+                        {(upload.matchedRows !== undefined || upload.unmatchedRows !== undefined) && (
+                          <div className="text-xs text-gray-500">
+                            Matched: {upload.matchedRows ?? 0} | Unmatched: {upload.unmatchedRows ?? 0}
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         ${upload.totalAmount.toLocaleString()}

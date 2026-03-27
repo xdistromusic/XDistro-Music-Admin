@@ -12,6 +12,7 @@ const resolveAuthMode = (): AdminAuthMode => {
 export const adminBackendConfig = {
   authMode: resolveAuthMode(),
   apiBaseUrl: getEnvValue("VITE_ADMIN_API_BASE_URL") || "/api/admin",
+  royaltyImportUrl: getEnvValue("VITE_ADMIN_ROYALTY_IMPORT_URL") || "",
 };
 
 export const isAdminDummyAuthEnabled = (): boolean => adminBackendConfig.authMode === "dummy";

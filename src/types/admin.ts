@@ -160,13 +160,22 @@ export interface AdminTakedownRequest {
 export type AdminRoyaltyUploadStatus = "Completed" | "Processing" | "Failed";
 
 export interface AdminRoyaltyUploadHistoryItem {
-  id: number;
+  id: number | string;
   fileName: string;
+  period?: string;
   uploadDate: string;
   recordsProcessed: number;
+  matchedRows?: number;
+  unmatchedRows?: number;
+  replacedRows?: number;
   totalAmount: number;
   status: AdminRoyaltyUploadStatus;
   processedBy: string;
+}
+
+export interface AdminRoyaltyUploadInput {
+  period: string;
+  file: File;
 }
 
 export interface AdminRoyaltyStats {

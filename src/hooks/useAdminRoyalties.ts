@@ -4,6 +4,7 @@ import {
   getAdminRoyaltyUploadHistory,
   uploadAdminRoyaltyFile,
 } from "@/services/adminRoyalties";
+import { AdminRoyaltyUploadInput } from "@/types/admin";
 
 const adminRoyaltyStatsQueryKey = ["admin", "royalties", "stats"] as const;
 const adminRoyaltyUploadHistoryQueryKey = ["admin", "royalties", "uploads"] as const;
@@ -28,7 +29,7 @@ export const useUploadAdminRoyaltyFile = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ fileName }: { fileName: string }) => uploadAdminRoyaltyFile(fileName),
+    mutationFn: (input: AdminRoyaltyUploadInput) => uploadAdminRoyaltyFile(input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: adminRoyaltyStatsQueryKey });
       void queryClient.invalidateQueries({ queryKey: adminRoyaltyUploadHistoryQueryKey });
