@@ -260,3 +260,55 @@ export const resyncAdminRoyaltyPeriod = async (period: string): Promise<string[]
 
   return payload.data?.periods ?? [period];
 };
+
+export type AdminRoyaltyRetentionCleanupSummary = {
+  dryRun: boolean;
+  reportArchives: {
+    candidates: number;
+    deleted: number;
+    retentionMonths: number;
+  };
+  orphanTrackFiles: {
+    candidates: number;
+    deleted: number;
+    retentionMonths: number;
+  };
+};
+
+export const runAdminRoyaltyRetentionCleanup = async (
+  dryRun: boolean,
+): Promise<AdminRoyaltyRetentionCleanupSummary> => {
+  if (isAdminDataDummyEnabled()) {
+    return {
+      dryRun,
+      reportArchives: {
+        candidates: 0,
+        deleted: 0,
+        retentionMonths: 12,
+      },
+      orphanTrackFiles: {
+        candidates: 0,
+        deleted: 0,
+        retentionMonths: 4,
+      },
+    };
+  }
+
+  if (!adminBackendConfig.royaltyImportUrl) {
+    throw new Error("VITE_ADMIN_ROYALTY_IMPORT_URL is not configured.");
+  }
+
+  const payload = await requestRoyaltyImport<{ data?: AdminRoyaltyRetentionCleanupSummary }>(undefined, {
+    method: "POST",
+    body: JSON.stringify({
+      mode: "cleanup",
+      dryRun,
+    }),
+  });
+
+  if (!payload.data) {
+    throw new Error("Cleanup summary was not returned.");
+  }
+
+  return payload.data;
+};

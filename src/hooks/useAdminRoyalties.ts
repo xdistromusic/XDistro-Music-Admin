@@ -3,6 +3,7 @@ import {
   getAdminRoyaltyStats,
   getAdminRoyaltyUploadHistory,
   resyncAdminRoyaltyPeriod,
+  runAdminRoyaltyRetentionCleanup,
   uploadAdminRoyaltyFile,
 } from "@/services/adminRoyalties";
 import { AdminRoyaltyUploadInput } from "@/types/admin";
@@ -43,6 +44,18 @@ export const useResyncAdminRoyaltyPeriod = () => {
 
   return useMutation({
     mutationFn: (period: string) => resyncAdminRoyaltyPeriod(period),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: adminRoyaltyStatsQueryKey });
+      void queryClient.invalidateQueries({ queryKey: adminRoyaltyUploadHistoryQueryKey });
+    },
+  });
+};
+
+export const useRunAdminRoyaltyRetentionCleanup = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (dryRun: boolean) => runAdminRoyaltyRetentionCleanup(dryRun),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: adminRoyaltyStatsQueryKey });
       void queryClient.invalidateQueries({ queryKey: adminRoyaltyUploadHistoryQueryKey });

@@ -6,12 +6,21 @@ import { Upload, Download, FileText, Check, AlertCircle, DollarSign } from "luci
 import { toast } from "sonner";
 import AdminPageLayout from "@/components/admin/AdminPageLayout";
 import AdminPageLoader from "@/components/admin/AdminPageLoader";
+import { AdminRoyaltyRetentionCleanupSummary } from "@/services/adminRoyalties";
 import {
   useResyncAdminRoyaltyPeriod,
+  useRunAdminRoyaltyRetentionCleanup,
   useAdminRoyaltyStats,
   useAdminRoyaltyUploadHistory,
   useUploadAdminRoyaltyFile,
 } from "@/hooks/useAdminRoyalties";
+
+const ADMIN_RETENTION_SUMMARY_KEY = "admin:royalty-retention:last-summary";
+
+type AdminRoyaltyRetentionSummaryState = {
+  ranAt: string;
+  summary: AdminRoyaltyRetentionCleanupSummary;
+};
 
 const AdminRoyalties = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -19,8 +28,10 @@ const AdminRoyalties = () => {
   const { data: uploadHistory = [], isLoading: isUploadHistoryLoading } = useAdminRoyaltyUploadHistory();
   const uploadRoyaltyFileMutation = useUploadAdminRoyaltyFile();
   const resyncRoyaltyPeriodMutation = useResyncAdminRoyaltyPeriod();
+  const retentionCleanupMutation = useRunAdminRoyaltyRetentionCleanup();
   const isProcessing = uploadRoyaltyFileMutation.isPending;
   const isResyncing = resyncRoyaltyPeriodMutation.isPending;
+  const isRunningRetentionCleanup = retentionCleanupMutation.isPending;
   const isLoading = isStatsLoading || isUploadHistoryLoading;
 
   const today = new Date();
@@ -28,6 +39,27 @@ const AdminRoyalties = () => {
   const defaultMonth = String(today.getMonth() + 1).padStart(2, "0");
   const [selectedYear, setSelectedYear] = useState(defaultYear);
   const [selectedMonth, setSelectedMonth] = useState(defaultMonth);
+  const [lastRetentionSummary, setLastRetentionSummary] = useState<AdminRoyaltyRetentionSummaryState | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    try {
+      const raw = localStorage.getItem(ADMIN_RETENTION_SUMMARY_KEY);
+      if (!raw) {
+        return null;
+      }
+
+      const parsed = JSON.parse(raw) as AdminRoyaltyRetentionSummaryState;
+      if (!parsed?.ranAt || !parsed?.summary) {
+        return null;
+      }
+
+      return parsed;
+    } catch {
+      return null;
+    }
+  });
 
   const months = [
     { value: "01", label: "January" },
@@ -87,6 +119,29 @@ const AdminRoyalties = () => {
       toast.success(`Re-sync completed for ${periods.join(", ")}`);
     } catch (error) {
       toast.error((error as Error).message || "Failed to re-sync the selected period.");
+    }
+  };
+
+  const handleRetentionCleanup = async (dryRun: boolean) => {
+    try {
+      const summary = await retentionCleanupMutation.mutateAsync(dryRun);
+      const nextSummary: AdminRoyaltyRetentionSummaryState = {
+        ranAt: new Date().toISOString(),
+        summary,
+      };
+      setLastRetentionSummary(nextSummary);
+      localStorage.setItem(ADMIN_RETENTION_SUMMARY_KEY, JSON.stringify(nextSummary));
+
+      const reportSummary = dryRun
+        ? `${summary.reportArchives.candidates} report archive(s) older than ${summary.reportArchives.retentionMonths} month(s)`
+        : `${summary.reportArchives.deleted} report archive(s) removed`;
+      const trackSummary = dryRun
+        ? `${summary.orphanTrackFiles.candidates} orphan track file(s) older than ${summary.orphanTrackFiles.retentionMonths} month(s)`
+        : `${summary.orphanTrackFiles.deleted} orphan track file(s) removed`;
+
+      toast.success(`${dryRun ? "Cleanup preview" : "Retention cleanup"} complete: ${reportSummary}; ${trackSummary}.`);
+    } catch (error) {
+      toast.error((error as Error).message || "Failed to run retention cleanup.");
     }
   };
 
@@ -274,8 +329,68 @@ USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2024-02`;
               >
                 {isResyncing ? "Re-syncing..." : "Re-sync Selected Period"}
               </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => handleRetentionCleanup(true)}
+                className="w-full"
+                disabled={isRunningRetentionCleanup || isProcessing || isResyncing}
+              >
+                {isRunningRetentionCleanup ? "Running Preview..." : "Preview Retention Cleanup"}
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => handleRetentionCleanup(false)}
+                className="w-full"
+                disabled={isRunningRetentionCleanup || isProcessing || isResyncing}
+              >
+                {isRunningRetentionCleanup ? "Applying Cleanup..." : "Apply Retention Cleanup"}
+              </Button>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-8">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Last Cleanup Summary</h3>
+            {lastRetentionSummary && (
+              <Badge className={lastRetentionSummary.summary.dryRun ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800"}>
+                {lastRetentionSummary.summary.dryRun ? "Preview" : "Applied"}
+              </Badge>
+            )}
+          </div>
+
+          {!lastRetentionSummary ? (
+            <p className="text-sm text-gray-600">
+              No cleanup run recorded yet. Use Preview Retention Cleanup to see what would be deleted.
+            </p>
+          ) : (
+            <div className="space-y-3 text-sm text-gray-700">
+              <p>
+                Ran at: {new Date(lastRetentionSummary.ranAt).toLocaleString()}
+              </p>
+              <p>
+                Report archives ({lastRetentionSummary.summary.reportArchives.retentionMonths} months):
+                {" "}
+                {lastRetentionSummary.summary.dryRun
+                  ? `${lastRetentionSummary.summary.reportArchives.candidates} candidate(s)`
+                  : `${lastRetentionSummary.summary.reportArchives.deleted} deleted`}
+              </p>
+              <p>
+                Orphan track files ({lastRetentionSummary.summary.orphanTrackFiles.retentionMonths} months):
+                {" "}
+                {lastRetentionSummary.summary.dryRun
+                  ? `${lastRetentionSummary.summary.orphanTrackFiles.candidates} candidate(s)`
+                  : `${lastRetentionSummary.summary.orphanTrackFiles.deleted} deleted`}
+              </p>
+              <p className="text-xs text-gray-500">
+                Track cleanup only removes old storage files that are no longer referenced by any database track record.
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
