@@ -39,7 +39,7 @@ const NotFound = () => {
             className="bg-onerpm-orange hover:bg-onerpm-orange/90 text-white"
           >
             <Home className="w-4 h-4 mr-2" />
-            Admin Dashboard
+            Dashboard
           </Button>
         </div>
       </div>

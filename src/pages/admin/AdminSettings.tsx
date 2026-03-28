@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Save, RefreshCw, Shield, Mail, DollarSign, Globe, Database, Bell, Users, FileText, Lock, Eye, EyeOff, CircleAlert as AlertCircle, Check, X, Upload, Download, UserPlus, CreditCard as Edit, Trash2, Crown, User as UserIcon } from "lucide-react";
+import { Settings, Save, RefreshCw, Shield, Mail, DollarSign, Globe, Database, Bell, Users, FileText, Lock, Eye, EyeOff, CircleAlert as AlertCircle, Check, X, Upload, Download, UserPlus, Pencil, Trash2, Crown, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import AdminNavbar from "@/components/admin/AdminNavbar";
 import AdminFooter from "@/components/admin/AdminFooter";
@@ -48,6 +48,8 @@ const AdminSettings = () => {
     new: false,
     confirm: false
   });
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editProfileDraft, setEditProfileDraft] = useState({ name: user?.name || '' });
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
@@ -252,18 +254,8 @@ const AdminSettings = () => {
   };
 
   const handleUpdateProfile = async () => {
-    if (!userProfile.name.trim()) {
+    if (!editProfileDraft.name.trim()) {
       toast.error("Name is required");
-      return;
-    }
-
-    if (!userProfile.email.trim()) {
-      toast.error("Email is required");
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userProfile.email)) {
-      toast.error("Please enter a valid email address");
       return;
     }
 
@@ -272,12 +264,19 @@ const AdminSettings = () => {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
+      setUserProfile(prev => ({ ...prev, name: editProfileDraft.name }));
+      setIsEditingProfile(false);
       toast.success("Profile updated successfully");
     } catch (error) {
       toast.error("Failed to update profile");
     } finally {
       setIsUpdatingProfile(false);
     }
+  };
+
+  const handleCancelEditProfile = () => {
+    setEditProfileDraft({ name: userProfile.name });
+    setIsEditingProfile(false);
   };
 
   const handleChangePassword = async () => {
@@ -337,421 +336,9 @@ const AdminSettings = () => {
 
   const tabs = [
     { id: "user", label: "User Profile", icon: UserIcon },
-    { id: "general", label: "General", icon: Settings },
-    { id: "payments", label: "Payments", icon: DollarSign },
-    { id: "distribution", label: "Distribution", icon: Globe },
-    { id: "notifications", label: "Notifications", icon: Bell },
-    { id: "security", label: "Security", icon: Shield },
     { id: "integrations", label: "Integrations", icon: Database },
     { id: "staff-access", label: "Staff Access", icon: Users }
   ];
-
-  const renderGeneralSettings = () => (
-    <div className="space-y-6">
-      <Card>
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4">System Controls</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium">Maintenance Mode</h4>
-                <p className="text-sm text-gray-600">Temporarily disable user access for maintenance</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.general.maintenanceMode}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    general: { ...prev.general, maintenanceMode: e.target.checked }
-                  }))}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-onerpm-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-onerpm-orange"></div>
-              </label>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium">User Registration</h4>
-                <p className="text-sm text-gray-600">Allow new users to register accounts</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.general.registrationEnabled}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    general: { ...prev.general, registrationEnabled: e.target.checked }
-                  }))}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-onerpm-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-onerpm-orange"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium">Email Verification Required</h4>
-                <p className="text-sm text-gray-600">Require email verification for new accounts</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.general.emailVerificationRequired}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    general: { ...prev.general, emailVerificationRequired: e.target.checked }
-                  }))}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-onerpm-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-onerpm-orange"></div>
-              </label>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
-  const renderPaymentSettings = () => (
-    <div className="space-y-6">
-      <Card>
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Payment Methods</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-4 h-4 text-blue-600" />
-                </div>
-                <div>
-                  <h4 className="font-medium">PayPal</h4>
-                  <p className="text-sm text-gray-600">Enable PayPal withdrawals</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Badge className={settings.payments.paypalEnabled ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
-                  {settings.payments.paypalEnabled ? "Enabled" : "Disabled"}
-                </Badge>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={settings.payments.paypalEnabled}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      payments: { ...prev.payments, paypalEnabled: e.target.checked }
-                    }))}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-onerpm-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-onerpm-orange"></div>
-                </label>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Database className="w-4 h-4 text-green-600" />
-                </div>
-                <div>
-                  <h4 className="font-medium">Bank Transfer</h4>
-                  <p className="text-sm text-gray-600">Enable direct bank transfers</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Badge className={settings.payments.bankTransferEnabled ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
-                  {settings.payments.bankTransferEnabled ? "Enabled" : "Disabled"}
-                </Badge>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={settings.payments.bankTransferEnabled}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      payments: { ...prev.payments, bankTransferEnabled: e.target.checked }
-                    }))}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-onerpm-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-onerpm-orange"></div>
-                </label>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
-  const renderDistributionSettings = () => (
-    <div className="space-y-6">
-      <Card>
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Distribution Configuration</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Distribution Delay (hours)</label>
-              <Input
-                type="number"
-                value={settings.distribution.distributionDelay}
-                onChange={(e) => setSettings(prev => ({
-                  ...prev,
-                  distribution: { ...prev.distribution, distributionDelay: Number(e.target.value) }
-                }))}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Max File Size (MB)</label>
-              <Input
-                type="number"
-                value={settings.distribution.maxFileSize}
-                onChange={(e) => setSettings(prev => ({
-                  ...prev,
-                  distribution: { ...prev.distribution, maxFileSize: Number(e.target.value) }
-                }))}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Default Royalty Rate (%)</label>
-              <Input
-                type="number"
-                min="0"
-                max="100"
-                value={settings.distribution.defaultRoyaltyRate}
-                onChange={(e) => setSettings(prev => ({
-                  ...prev,
-                  distribution: { ...prev.distribution, defaultRoyaltyRate: Number(e.target.value) }
-                }))}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Quality Controls</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium">Auto Distribution</h4>
-                <p className="text-sm text-gray-600">Automatically distribute approved releases</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.distribution.autoDistribution}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    distribution: { ...prev.distribution, autoDistribution: e.target.checked }
-                  }))}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-onerpm-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-onerpm-orange"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium">Quality Check Required</h4>
-                <p className="text-sm text-gray-600">Require manual quality review</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.distribution.qualityCheckRequired}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    distribution: { ...prev.distribution, qualityCheckRequired: e.target.checked }
-                  }))}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-onerpm-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-onerpm-orange"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium">Cover Art Required</h4>
-                <p className="text-sm text-gray-600">Require cover art for all releases</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.distribution.coverArtRequired}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    distribution: { ...prev.distribution, coverArtRequired: e.target.checked }
-                  }))}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-onerpm-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-onerpm-orange"></div>
-              </label>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
-  const renderNotificationSettings = () => (
-    <div className="space-y-6">
-      <Card>
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Notification Preferences</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5 text-gray-500" />
-                <div>
-                  <h4 className="font-medium">Email Notifications</h4>
-                  <p className="text-sm text-gray-600">Send notifications via email</p>
-                </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.notifications.emailNotifications}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    notifications: { ...prev.notifications, emailNotifications: e.target.checked }
-                  }))}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-onerpm-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-onerpm-orange"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Bell className="w-5 h-5 text-gray-500" />
-                <div>
-                  <h4 className="font-medium">Push Notifications</h4>
-                  <p className="text-sm text-gray-600">Send browser push notifications</p>
-                </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.notifications.pushNotifications}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    notifications: { ...prev.notifications, pushNotifications: e.target.checked }
-                  }))}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-onerpm-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-onerpm-orange"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <AlertCircle className="w-5 h-5 text-gray-500" />
-                <div>
-                  <h4 className="font-medium">Admin Alerts</h4>
-                  <p className="text-sm text-gray-600">Critical system alerts for admins</p>
-                </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.notifications.adminAlerts}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    notifications: { ...prev.notifications, adminAlerts: e.target.checked }
-                  }))}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-onerpm-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-onerpm-orange"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <DollarSign className="w-5 h-5 text-gray-500" />
-                <div>
-                  <h4 className="font-medium">Payment Notifications</h4>
-                  <p className="text-sm text-gray-600">Notify users about payments</p>
-                </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.notifications.paymentNotifications}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    notifications: { ...prev.notifications, paymentNotifications: e.target.checked }
-                  }))}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-onerpm-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-onerpm-orange"></div>
-              </label>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
-  const renderSecuritySettings = () => (
-    <div className="space-y-6"> 
-      <Card>
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Security Features</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium">Two-Factor Authentication Required</h4>
-                <p className="text-sm text-gray-600">Require 2FA for all admin accounts</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.security.twoFactorRequired}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    security: { ...prev.security, twoFactorRequired: e.target.checked }
-                  }))}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-onerpm-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-onerpm-orange"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium">Password Special Characters</h4>
-                <p className="text-sm text-gray-600">Require special characters in passwords</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.security.passwordRequireSpecial}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    security: { ...prev.security, passwordRequireSpecial: e.target.checked }
-                  }))}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-onerpm-orange/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-onerpm-orange"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium">Data Encryption</h4>
-                <p className="text-sm text-gray-600">Encrypt sensitive data at rest</p>
-              </div>
-              <Badge className="bg-green-100 text-green-800">
-                <Lock className="w-3 h-3 mr-1" />
-                Enabled
-              </Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
 
   const renderIntegrationsSettings = () => (
     <div className="space-y-6">
@@ -1130,53 +717,83 @@ const AdminSettings = () => {
             {/* Profile Information */}
             <Card>
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <UserIcon className="w-5 h-5" />
-                  Profile Information
-                </h3>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input
-                        id="name"
-                        type="text"
-                        value={userProfile.name}
-                        onChange={(e) => setUserProfile(prev => ({ ...prev, name: e.target.value }))}
-                        placeholder="Enter your full name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={userProfile.email}
-                        onChange={(e) => setUserProfile(prev => ({ ...prev, email: e.target.value }))}
-                        placeholder="Enter your email address"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex justify-end">
-                    <Button 
-                      onClick={handleUpdateProfile}
-                      disabled={isUpdatingProfile}
-                      className="bg-onerpm-orange hover:bg-onerpm-orange/90"
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <UserIcon className="w-5 h-5" />
+                    Profile Information
+                  </h3>
+                  {!isEditingProfile && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEditProfileDraft({ name: userProfile.name });
+                        setIsEditingProfile(true);
+                      }}
                     >
-                      {isUpdatingProfile ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                          Updating...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="w-4 h-4 mr-2" />
-                          Update Profile
-                        </>
-                      )}
+                      <Pencil className="w-4 h-4 mr-2" />
+                      Edit
                     </Button>
-                  </div>
+                  )}
                 </div>
+
+                {isEditingProfile ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-name">Full Name</Label>
+                        <Input
+                          id="edit-name"
+                          type="text"
+                          value={editProfileDraft.name}
+                          onChange={(e) => setEditProfileDraft(prev => ({ ...prev, name: e.target.value }))}
+                          placeholder="Enter your full name"
+                          autoFocus
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Email Address</Label>
+                        <div className="flex items-center h-10 px-3 rounded-md border border-input bg-muted text-sm text-muted-foreground select-none">
+                          {userProfile.email}
+                        </div>
+                        <p className="text-xs text-gray-400">Email address cannot be changed</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={handleCancelEditProfile} disabled={isUpdatingProfile}>
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleUpdateProfile}
+                        disabled={isUpdatingProfile}
+                        className="bg-onerpm-orange hover:bg-onerpm-orange/90"
+                      >
+                        {isUpdatingProfile ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4 mr-2" />
+                            Save Changes
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 mb-1">Full Name</p>
+                      <p className="text-gray-900">{userProfile.name || '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 mb-1">Email Address</p>
+                      <p className="text-gray-900">{userProfile.email || '—'}</p>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -1296,22 +913,211 @@ const AdminSettings = () => {
           </div>
         );
 
-      case "general":
-        return renderGeneralSettings();
-      case "payments":
-        return renderPaymentSettings();
-      case "distribution":
-        return renderDistributionSettings();
-      case "notifications":
-        return renderNotificationSettings();
-      case "security":
-        return renderSecuritySettings();
       case "integrations":
         return renderIntegrationsSettings();
       case "staff-access":
         return renderStaffAccessSettings();
       default:
-        return renderGeneralSettings();
+        return (
+          <div className="space-y-6">
+            {/* Profile Information */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <UserIcon className="w-5 h-5" />
+                    Profile Information
+                  </h3>
+                  {!isEditingProfile && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEditProfileDraft({ name: userProfile.name });
+                        setIsEditingProfile(true);
+                      }}
+                    >
+                      <Pencil className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                  )}
+                </div>
+
+                {isEditingProfile ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-name-default">Full Name</Label>
+                        <Input
+                          id="edit-name-default"
+                          type="text"
+                          value={editProfileDraft.name}
+                          onChange={(e) => setEditProfileDraft(prev => ({ ...prev, name: e.target.value }))}
+                          placeholder="Enter your full name"
+                          autoFocus
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Email Address</Label>
+                        <div className="flex items-center h-10 px-3 rounded-md border border-input bg-muted text-sm text-muted-foreground select-none">
+                          {userProfile.email}
+                        </div>
+                        <p className="text-xs text-gray-400">Email address cannot be changed</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={handleCancelEditProfile} disabled={isUpdatingProfile}>
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleUpdateProfile}
+                        disabled={isUpdatingProfile}
+                        className="bg-onerpm-orange hover:bg-onerpm-orange/90"
+                      >
+                        {isUpdatingProfile ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4 mr-2" />
+                            Save Changes
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 mb-1">Full Name</p>
+                      <p className="text-gray-900">{userProfile.name || '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 mb-1">Email Address</p>
+                      <p className="text-gray-900">{userProfile.email || '—'}</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Change Password */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Shield className="w-5 h-5" />
+                  Change Password
+                </h3>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="currentPassword"
+                        type={showPasswords.current ? "text" : "password"}
+                        value={userProfile.currentPassword}
+                        onChange={(e) => setUserProfile(prev => ({ ...prev, currentPassword: e.target.value }))}
+                        placeholder="Enter your current password"
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => togglePasswordVisibility('current')}
+                      >
+                        {showPasswords.current ? (
+                          <EyeOff className="h-4 w-4 text-gray-500" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-500" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="newPassword">New Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="newPassword"
+                          type={showPasswords.new ? "text" : "password"}
+                          value={userProfile.newPassword}
+                          onChange={(e) => setUserProfile(prev => ({ ...prev, newPassword: e.target.value }))}
+                          placeholder="Enter new password"
+                          className="pr-10"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => togglePasswordVisibility('new')}
+                        >
+                          {showPasswords.new ? (
+                            <EyeOff className="h-4 w-4 text-gray-500" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-gray-500" />
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-500">Must be at least 8 characters long</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="confirmPassword"
+                          type={showPasswords.confirm ? "text" : "password"}
+                          value={userProfile.confirmPassword}
+                          onChange={(e) => setUserProfile(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                          placeholder="Confirm new password"
+                          className="pr-10"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => togglePasswordVisibility('confirm')}
+                        >
+                          {showPasswords.confirm ? (
+                            <EyeOff className="h-4 w-4 text-gray-500" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-gray-500" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button 
+                      onClick={handleChangePassword}
+                      disabled={isChangingPassword}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {isChangingPassword ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                          Changing...
+                        </>
+                      ) : (
+                        <>
+                          <Shield className="w-4 h-4 mr-2" />
+                          Change Password
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
     }
   };
 

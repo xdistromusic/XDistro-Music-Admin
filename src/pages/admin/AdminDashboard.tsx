@@ -8,6 +8,20 @@ import { useAdminReleases } from "@/hooks/useAdminReleases";
 import { useAdminRoyaltyRequests } from "@/hooks/useAdminRoyaltyRequests";
 import { useAdminTakedownRequests } from "@/hooks/useAdminTakedownRequests";
 
+const StatCardSkeleton = () => (
+  <Card>
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <div className="h-4 w-28 bg-gray-200 rounded animate-pulse" />
+          <div className="h-8 w-16 bg-gray-200 rounded animate-pulse" />
+        </div>
+        <div className="w-12 h-12 bg-gray-200 rounded-lg animate-pulse" />
+      </div>
+    </CardContent>
+  </Card>
+);
+
 const AdminDashboard = () => {
   const { data: usersData, isLoading: usersLoading } = useAdminUsers();
   const { data: releasesData, isLoading: releasesLoading } = useAdminReleases();
@@ -138,43 +152,57 @@ const AdminDashboard = () => {
     </Card>
   );
 
+  const isLoading = usersLoading || releasesLoading || royaltyLoading || takedownLoading;
+
   return (
-    <AdminPageLayout title="Admin Dashboard" subtitle="Activity Overview">
+    <AdminPageLayout title="Dashboard" subtitle="Platform overview and operational highlights.">
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <StatCard
-            title="Total Users"
-            value={stats.totalUsers} 
-            icon={<Users className="w-6 h-6 text-onerpm-orange" />}
-          />
-          <StatCard
-            title="Active Subscribers"
-            value={stats.activeSubscribers}
-            icon={<UserCheck className="w-6 h-6 text-onerpm-orange" />}
-          />
-          <StatCard
-            title="Total Releases"
-            value={stats.totalReleases}
-            icon={<Music className="w-6 h-6 text-onerpm-orange" />}
-          />
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, i) => <StatCardSkeleton key={i} />)
+          ) : (
+            <>
+              <StatCard
+                title="Total Users"
+                value={stats.totalUsers}
+                icon={<Users className="w-6 h-6 text-onerpm-orange" />}
+              />
+              <StatCard
+                title="Active Subscribers"
+                value={stats.activeSubscribers}
+                icon={<UserCheck className="w-6 h-6 text-onerpm-orange" />}
+              />
+              <StatCard
+                title="Total Releases"
+                value={stats.totalReleases}
+                icon={<Music className="w-6 h-6 text-onerpm-orange" />}
+              />
+            </>
+          )}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6 mb-8">          
-          <StatCard
-            title="Pending Releases"
-            value={stats.pendingReleases}
-            icon={<Calendar className="w-6 h-6 text-onerpm-orange" />}
-          />
-          <StatCard
-            title="Royalty Requests"
-            value={stats.royaltyRequests}
-            icon={<DollarSign className="w-6 h-6 text-onerpm-orange" />}
-          />
-          <StatCard
-            title="Takedown Requests"
-            value={stats.takedownRequests}
-            icon={<AlertTriangle className="w-6 h-6 text-onerpm-orange" />}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, i) => <StatCardSkeleton key={i} />)
+          ) : (
+            <>
+              <StatCard
+                title="Pending Releases"
+                value={stats.pendingReleases}
+                icon={<Calendar className="w-6 h-6 text-onerpm-orange" />}
+              />
+              <StatCard
+                title="Royalty Requests"
+                value={stats.royaltyRequests}
+                icon={<DollarSign className="w-6 h-6 text-onerpm-orange" />}
+              />
+              <StatCard
+                title="Takedown Requests"
+                value={stats.takedownRequests}
+                icon={<AlertTriangle className="w-6 h-6 text-onerpm-orange" />}
+              />
+            </>
+          )}
         </div>
 
         {/* Quick Actions */}
@@ -206,7 +234,17 @@ const AdminDashboard = () => {
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
             <div className="space-y-4">
-              {recentActivity.length === 0 ? (
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-start space-x-3 p-3">
+                    <div className="w-2 h-2 rounded-full mt-2 bg-gray-200 animate-pulse flex-shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4" />
+                      <div className="h-3 bg-gray-200 rounded animate-pulse w-1/4" />
+                    </div>
+                  </div>
+                ))
+              ) : recentActivity.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">No activity yet</p>
               ) : (
                 recentActivity.map((activity) => (
