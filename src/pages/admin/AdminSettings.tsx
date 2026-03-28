@@ -4,26 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Save, RefreshCw, Shield, Mail, DollarSign, Globe, Database, Bell, Users, FileText, Lock, Eye, EyeOff, CircleAlert as AlertCircle, Check, X, Upload, Download, UserPlus, Pencil, Trash2, Crown, User as UserIcon } from "lucide-react";
+import { Settings, Save, RefreshCw, Shield, Mail, DollarSign, Globe, Database, Bell, Users, FileText, Lock, Eye, EyeOff, CircleAlert as AlertCircle, Check, X, Upload, Download, UserPlus, Pencil, Trash2, Crown, User as UserIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import AdminNavbar from "@/components/admin/AdminNavbar";
 import AdminFooter from "@/components/admin/AdminFooter";
 import StaffMemberFormModal from "@/components/admin/StaffMemberFormModal";
 import ActionConfirmationModal from "@/components/admin/ActionConfirmationModal";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminStaff, useCreateStaff, useUpdateStaff, useDeleteStaff } from "@/hooks/useAdminStaff";
+import { StaffMember, CreateStaffInput } from "@/types/admin";
 
-interface StaffMember {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  permissions: string[];
-  status: string;
-  lastLogin: string;
-  joinDate: string;
-}
-
-type StaffMemberFormData = Omit<StaffMember, "id" | "status" | "lastLogin" | "joinDate">;
+type StaffMemberFormData = CreateStaffInput;
 
 const AdminSettings = () => {
   const [activeTab, setActiveTab] = useState("user");
@@ -34,6 +25,12 @@ const AdminSettings = () => {
   const [selectedStaffMember, setSelectedStaffMember] = useState<StaffMember | null>(null);
   const [staffMemberToRemove, setStaffMemberToRemove] = useState<StaffMember | null>(null);
   const { user } = useAuth();
+
+  // Staff management via backend
+  const { data: staffMembers = [], isLoading: isLoadingStaff } = useAdminStaff();
+  const createStaff = useCreateStaff();
+  const updateStaff = useUpdateStaff();
+  const deleteStaff = useDeleteStaff();
 
   // User profile form state
   const [userProfile, setUserProfile] = useState({
@@ -53,49 +50,7 @@ const AdminSettings = () => {
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  // Mock staff members data
-  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([
-    {
-      id: 1,
-      name: "John Admin",
-      email: "john@xdistromusic.com",
-      role: "Super Admin",
-      permissions: ["all"],
-      status: "Active",
-      lastLogin: "2024-03-15 14:30",
-      joinDate: "2024-01-15"
-    },
-    {
-      id: 2,
-      name: "Sarah Manager",
-      email: "sarah@xdistromusic.com",
-      role: "Manager",
-      permissions: ["users", "releases", "royalties", "reports"],
-      status: "Active",
-      lastLogin: "2024-03-14 16:45",
-      joinDate: "2024-02-01"
-    },
-    {
-      id: 3,
-      name: "Mike Support",
-      email: "mike@xdistromusic.com",
-      role: "Support Agent",
-      permissions: ["users", "reports"],
-      status: "Active",
-      lastLogin: "2024-03-13 09:15",
-      joinDate: "2024-02-15"
-    },
-    {
-      id: 4,
-      name: "Lisa Reviewer",
-      email: "lisa@xdistromusic.com",
-      role: "Content Reviewer",
-      permissions: ["releases", "takedowns"],
-      status: "Inactive",
-      lastLogin: "2024-03-10 11:20",
-      joinDate: "2024-03-01"
-    }
-  ]);  
+
 
   // Mock settings data
   const [settings, setSettings] = useState({
@@ -168,27 +123,29 @@ const AdminSettings = () => {
       return;
     }
 
-    setStaffMembers(prev => prev.filter(staff => staff.id !== staffMemberToRemove.id));
-    toast.success(`${staffMemberToRemove.name} has been removed from staff`);
-    setStaffMemberToRemove(null);
+    deleteStaff.mutate(staffMemberToRemove.id, {
+      onSuccess: () => {
+        toast.success(`${staffMemberToRemove.name} has been removed from staff`);
+        setStaffMemberToRemove(null);
+      },
+      onError: (error) => {
+        toast.error(error instanceof Error ? error.message : "Failed to remove staff member");
+        setStaffMemberToRemove(null);
+      },
+    });
   };
 
   const handleSaveStaffMember = (formData: StaffMemberFormData) => {
     if (modalMode === 'add') {
-      const newStaffMember = {
-        id: Math.max(...staffMembers.map(s => s.id)) + 1,
-        ...formData,
-        joinDate: new Date().toISOString().split('T')[0],
-        lastLogin: "Never",
-        status: "Active"
-      };
-      setStaffMembers(prev => [...prev, newStaffMember]);
-    } else {
-      setStaffMembers(prev => prev.map(staff => 
-        staff.id === selectedStaffMember?.id 
-          ? { ...staff, ...formData }
-          : staff
-      ));
+      createStaff.mutate(formData, {
+        onSuccess: () => toast.success("Staff member added successfully"),
+        onError: (error) => toast.error(error instanceof Error ? error.message : "Failed to add staff member"),
+      });
+    } else if (selectedStaffMember) {
+      updateStaff.mutate({ id: selectedStaffMember.id, updates: formData }, {
+        onSuccess: () => toast.success("Staff member updated successfully"),
+        onError: (error) => toast.error(error instanceof Error ? error.message : "Failed to update staff member"),
+      });
     }
   };
 
@@ -199,24 +156,21 @@ const AdminSettings = () => {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'Super Admin':
-        return 'bg-purple-100 text-purple-800';
-      case 'Admin':
-        return 'bg-blue-100 text-blue-800';
-      case 'Manager':
-        return 'bg-green-100 text-green-800';
-      case 'Support Agent':
-        return 'bg-orange-100 text-orange-800';
-      case 'Content Reviewer':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'super_admin': return 'bg-purple-100 text-purple-800';
+      case 'admin':       return 'bg-blue-100 text-blue-800';
+      case 'manager':     return 'bg-green-100 text-green-800';
+      case 'support_agent': return 'bg-orange-100 text-orange-800';
+      case 'content_reviewer': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
+  const formatRole = (role: string) =>
+    role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
   const getStatusColor = (status: string) => {
-    return status === 'Active' 
-      ? 'bg-green-100 text-green-800' 
+    return status === 'active'
+      ? 'bg-green-100 text-green-800'
       : 'bg-red-100 text-red-800';
   };
 
@@ -484,6 +438,12 @@ const AdminSettings = () => {
                   </Button>
                 </div>
 
+                {isLoadingStaff ? (
+                  <div className="flex items-center justify-center py-12 text-gray-500">
+                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                    Loading staff members...
+                  </div>
+                ) : (
                 <div className="overflow-x-auto">
                   <table className="w-auto">
                     <thead className="bg-gray-50 border-b border-gray-200">
@@ -514,11 +474,7 @@ const AdminSettings = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <div className="w-10 h-10 bg-onerpm-orange/10 rounded-full flex items-center justify-center mr-3">
-                                {member.role === 'Super Admin' ? (
-                                  <Crown className="w-5 h-5 text-onerpm-orange" />
-                                ) : (
-                                  <Crown className="w-5 h-5 text-onerpm-orange" />
-                                )}
+                                <Crown className="w-5 h-5 text-onerpm-orange" />
                               </div>
                               <div>
                                 <div className="text-sm font-medium text-gray-900">{member.name}</div>
@@ -531,10 +487,10 @@ const AdminSettings = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <Badge className={getRoleColor(member.role)}>
-                              {member.role}
+                              {formatRole(member.role)}
                             </Badge>
                             <div className="text-xs text-gray-500 mt-1">
-                              Since {member.joinDate}
+                              Since {member.createdAt}
                             </div>
                           </td>
                           <td className="px-6 py-4">
@@ -544,11 +500,11 @@ const AdminSettings = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <Badge className={getStatusColor(member.status)}>
-                              {member.status}
+                              {member.status.charAt(0).toUpperCase() + member.status.slice(1)}
                             </Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {member.lastLogin}
+                            {member.lastLogin ?? "Never"}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div className="flex space-x-2">
@@ -561,7 +517,7 @@ const AdminSettings = () => {
                               >
                                 <Pencil className="w-4 h-4" />
                               </Button>
-                              {member.role !== 'Super Admin' && (
+                              {member.role !== 'super_admin' && (
                                 <Button 
                                   variant="ghost" 
                                   size="sm"
@@ -579,6 +535,7 @@ const AdminSettings = () => {
                     </tbody>
                   </table>
                 </div>
+                )}
               </CardContent>
             </Card>
 

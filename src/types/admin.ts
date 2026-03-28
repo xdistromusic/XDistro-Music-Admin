@@ -1,4 +1,9 @@
-export type AdminRole = "admin";
+export type AdminRole =
+  | "super_admin"
+  | "admin"
+  | "manager"
+  | "support_agent"
+  | "content_reviewer";
 
 export type AdminPermission =
   | "dashboard"
@@ -9,6 +14,15 @@ export type AdminPermission =
   | "royalty_requests"
   | "takedown_requests"
   | "settings";
+
+/** Permissions granted to each role by default. */
+export const ROLE_DEFAULT_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
+  super_admin: ["dashboard", "users", "releases", "artists", "royalties", "royalty_requests", "takedown_requests", "settings"],
+  admin:        ["dashboard", "users", "releases", "artists", "royalties", "royalty_requests", "takedown_requests", "settings"],
+  manager:      ["dashboard", "users", "releases", "artists", "royalties", "royalty_requests", "takedown_requests"],
+  support_agent:      ["dashboard", "users"],
+  content_reviewer:   ["dashboard", "releases", "takedown_requests"],
+};
 
 export interface AdminUser {
   id: string;
@@ -23,6 +37,22 @@ export interface AdminSession {
   expiresAt: number;
   user: AdminUser;
 }
+
+/** A staff member record stored in the admin_staff table. */
+export interface StaffMember {
+  id: string;
+  email: string;
+  name: string;
+  role: AdminRole;
+  permissions: AdminPermission[];
+  status: "active" | "inactive";
+  createdAt: string;
+  lastLogin: string | null;
+}
+
+export type CreateStaffInput = Pick<StaffMember, "email" | "name" | "role" | "permissions">;
+export type UpdateStaffInput = Partial<Pick<StaffMember, "name" | "role" | "permissions" | "status">>;
+
 
 export type AdminEntityId = string | number;
 

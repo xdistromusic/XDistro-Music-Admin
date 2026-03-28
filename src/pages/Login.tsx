@@ -49,7 +49,7 @@ const Login = () => {
         toast.success("Welcome to the admin dashboard!");
         navigate(from, { replace: true });
       } else {
-        toast.error("Invalid credentials. Please try again.");
+        toast.error("Invalid login credentials. Please try again.");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -62,7 +62,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-onerpm-dark-blue to-black">
       <main className="flex-grow flex items-center justify-center py-16 px-4">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-2xl">
           <div className="bg-white/5 backdrop-blur-sm shadow-xl rounded-xl p-8 border border-white/10">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-onerpm-orange/10 rounded-full flex items-center justify-center mx-auto mb-4">

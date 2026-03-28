@@ -1,6 +1,8 @@
 import { useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
+import { adminProtectedRoutes } from "@/config/adminRoutes";
+import { userCanAccessPermission } from "@/lib/adminPermissions";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -25,6 +27,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   
   if (!user) {
     return <Navigate to="/login" replace state={{ from: attemptedPath }} />;
+  }
+
+  const matchedRoute = adminProtectedRoutes.find((route) => route.path === location.pathname);
+  if (matchedRoute?.requiredPermission && !userCanAccessPermission(user, matchedRoute.requiredPermission)) {
+    return <Navigate to="/admin" replace />;
   }
   
   return <>{children}</>;

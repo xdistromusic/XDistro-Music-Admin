@@ -5,6 +5,7 @@ import { Menu, X, LogOut, User, ChevronDown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/toast";
 import { adminPrimaryNavRoutes, adminUserMenuRoutes } from "@/config/adminRoutes";
+import { filterRoutesByPermission } from "@/lib/adminPermissions";
 
 const AdminNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,6 +13,8 @@ const AdminNavbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const visiblePrimaryRoutes = filterRoutesByPermission(adminPrimaryNavRoutes, user);
+  const visibleUserMenuRoutes = filterRoutesByPermission(adminUserMenuRoutes, user);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -40,7 +43,7 @@ const AdminNavbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {adminPrimaryNavRoutes.map((route) => (
+            {visiblePrimaryRoutes.map((route) => (
               <Link 
                 key={route.path}
                 to={route.path} 
@@ -76,7 +79,7 @@ const AdminNavbar = () => {
                     <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                     <p className="text-xs text-gray-500">{user?.email}</p>
                   </div> 
-                  {adminUserMenuRoutes.map((route) => {
+                  {visibleUserMenuRoutes.map((route) => {
                     const Icon = route.icon;
 
                     return (
@@ -118,7 +121,7 @@ const AdminNavbar = () => {
         {isMenuOpen && (
           <div className="md:hidden mt-4 pb-4 border-t border-gray-700 pt-4">
             <div className="flex flex-col space-y-3">
-              {adminPrimaryNavRoutes.map((route) => (
+              {visiblePrimaryRoutes.map((route) => (
                 <Link 
                   key={route.path}
                   to={route.path} 
@@ -142,7 +145,7 @@ const AdminNavbar = () => {
                     <p className="text-white/60 text-xs">{user?.email}</p>
                   </div>
                 </div>
-                {adminUserMenuRoutes.map((route) => {
+                {visibleUserMenuRoutes.map((route) => {
                   const Icon = route.icon;
 
                   return (

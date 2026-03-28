@@ -143,7 +143,9 @@ export const getCurrentAdminUser = async (): Promise<AdminUser | null> => {
 
     return remoteUser;
   } catch {
-    return storedUser;
+    // In REST mode, failing to verify /me means the session is invalid.
+    clearAdminSession();
+    return null;
   }
 };
 

@@ -5,25 +5,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/lib/toast";
 import { User, Mail, Shield, X } from "lucide-react";
-
-interface StaffMember {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  joinDate: string;
-  lastLogin: string;
-  status: string;
-  permissions: string[];
-}
+import { AdminRole, AdminPermission, CreateStaffInput, StaffMember, ROLE_DEFAULT_PERMISSIONS } from "@/types/admin";
 
 interface StaffMemberFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: Omit<StaffMember, 'id' | 'joinDate' | 'lastLogin' | 'status'>) => void;
+  onSubmit: (data: CreateStaffInput) => void;
   initialData?: StaffMember | null;
   mode: 'add' | 'edit';
 }
+
+const AVAILABLE_ROLES: { value: AdminRole; label: string }[] = [
+  { value: 'super_admin',      label: 'Super Admin' },
+  { value: 'admin',            label: 'Admin' },
+  { value: 'manager',         label: 'Manager' },
+  { value: 'support_agent',   label: 'Support Agent' },
+  { value: 'content_reviewer', label: 'Content Reviewer' },
+];
+
+const AVAILABLE_PERMISSIONS: AdminPermission[] = [
+  'dashboard', 'users', 'releases', 'artists', 'royalties',
+  'royalty_requests', 'takedown_requests', 'settings',
+];
 
 const StaffMemberFormModal = ({ 
   isOpen, 
@@ -32,31 +35,17 @@ const StaffMemberFormModal = ({
   initialData, 
   mode 
 }: StaffMemberFormModalProps) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateStaffInput>({
     name: '',
     email: '',
-    role: 'Support Agent',
-    permissions: [] as string[]
+    role: 'support_agent',
+    permissions: []
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const availableRoles = [
-    'Super Admin',
-    'Admin', 
-    'Manager',
-    'Support Agent',
-    'Content Reviewer'
-  ];
-
-  const availablePermissions = [
-    'users',
-    'releases', 
-    'royalties',
-    'reports',
-    'takedowns',
-    'settings'
-  ];
+  const availableRoles = AVAILABLE_ROLES;
+  const availablePermissions = AVAILABLE_PERMISSIONS;
 
   // Reset form when modal opens/closes or initialData changes
   useEffect(() => {
@@ -72,7 +61,7 @@ const StaffMemberFormModal = ({
         setFormData({
           name: '',
           email: '',
-          role: 'Support Agent',
+          role: 'support_agent',
           permissions: []
         });
       }
@@ -133,15 +122,25 @@ const StaffMemberFormModal = ({
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (field: "name" | "email" | "role", value: string) => {
+    if (field === "role") {
+      const role = value as AdminRole;
+      setFormData((prev) => ({
+        ...prev,
+        role,
+        // Keep permissions aligned to role defaults unless manually changed afterward.
+        permissions: [...ROLE_DEFAULT_PERMISSIONS[role]],
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    }
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
-  const handlePermissionToggle = (permission: string) => {
+  const handlePermissionToggle = (permission: AdminPermission) => {
     setFormData(prev => ({
       ...prev,
       permissions: prev.permissions.includes(permission)
@@ -220,8 +219,8 @@ const StaffMemberFormModal = ({
                 className={`w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-onerpm-orange focus:border-transparent ${errors.role ? 'border-red-500' : ''}`}
                 disabled={isSubmitting}
               >
-                {availableRoles.map(role => (
-                  <option key={role} value={role}>{role}</option>
+                {availableRoles.map(({ value, label }) => (
+                  <option key={value} value={value}>{label}</option>
                 ))}
               </select>
             </div>

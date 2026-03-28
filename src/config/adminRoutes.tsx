@@ -1,6 +1,7 @@
 import { Home, Users, Music, UserRound, DollarSign, Settings, TriangleAlert as AlertTriangle } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { lazy, type ComponentType, type LazyExoticComponent } from "react";
+import { AdminPermission } from "@/types/admin";
 
 const AdminArtists = lazy(() => import("@/pages/admin/AdminArtists"));
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
@@ -17,6 +18,7 @@ export interface AdminRouteConfig {
   label: string;
   icon: LucideIcon;
   component: ComponentType | LazyExoticComponent<ComponentType>;
+  requiredPermission?: AdminPermission;
   showInPrimaryNav?: boolean;
   showInUserMenu?: boolean;
 }
@@ -28,6 +30,7 @@ export const adminProtectedRoutes: AdminRouteConfig[] = [
     label: "Overview",
     icon: Home,
     component: AdminDashboard,
+    requiredPermission: "dashboard",
     showInPrimaryNav: true,
   },
   {
@@ -36,6 +39,7 @@ export const adminProtectedRoutes: AdminRouteConfig[] = [
     label: "Users",
     icon: Users,
     component: AdminUsers,
+    requiredPermission: "users",
     showInPrimaryNav: true,
   },
   {
@@ -44,6 +48,7 @@ export const adminProtectedRoutes: AdminRouteConfig[] = [
     label: "Releases",
     icon: Music,
     component: AdminReleases,
+    requiredPermission: "releases",
     showInPrimaryNav: true,
   },
   {
@@ -52,6 +57,7 @@ export const adminProtectedRoutes: AdminRouteConfig[] = [
     label: "Artists",
     icon: UserRound,
     component: AdminArtists,
+    requiredPermission: "artists",
     showInPrimaryNav: true,
   },
   {
@@ -60,6 +66,7 @@ export const adminProtectedRoutes: AdminRouteConfig[] = [
     label: "Royalties",
     icon: DollarSign,
     component: AdminRoyalties,
+    requiredPermission: "royalties",
     showInPrimaryNav: true,
   },
   {
@@ -68,6 +75,7 @@ export const adminProtectedRoutes: AdminRouteConfig[] = [
     label: "Withdrawals",
     icon: DollarSign,
     component: AdminRoyaltyRequests,
+    requiredPermission: "royalty_requests",
     showInPrimaryNav: true,
   },
   {
@@ -76,6 +84,7 @@ export const adminProtectedRoutes: AdminRouteConfig[] = [
     label: "Takedowns",
     icon: AlertTriangle,
     component: AdminTakedownRequests,
+    requiredPermission: "takedown_requests",
     showInPrimaryNav: true,
   },
   {
@@ -84,6 +93,7 @@ export const adminProtectedRoutes: AdminRouteConfig[] = [
     label: "Settings",
     icon: Settings,
     component: AdminSettings,
+    requiredPermission: "settings",
     showInUserMenu: true,
   },
 ];
