@@ -85,7 +85,7 @@ const Login = () => {
                           <Input
                             {...field}
                             type="email"
-                            placeholder="admin@xdistromusic.com"
+                            placeholder="your emaill address"
                             className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
                           />
                         </div>

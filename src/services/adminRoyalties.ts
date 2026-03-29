@@ -130,7 +130,7 @@ const buildUploadFromCsv = async (input: AdminRoyaltyUploadInput): Promise<Admin
     replacedRows: 0,
     totalAmount: Number(totalAmount.toFixed(2)),
     status: "Completed",
-    processedBy: "admin@xdistromusic.com",
+    processedBy: "support@xdistromusic.com",
   };
 };
 

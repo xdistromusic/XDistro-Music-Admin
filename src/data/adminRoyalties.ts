@@ -14,7 +14,7 @@ export const mockAdminRoyaltyUploadHistory: AdminRoyaltyUploadHistoryItem[] = [
     recordsProcessed: 15420,
     totalAmount: 89432.56,
     status: "Completed",
-    processedBy: "admin@xdistromusic.com",
+    processedBy: "support@xdistromusic.com",
   },
   {
     id: 2,
@@ -23,7 +23,7 @@ export const mockAdminRoyaltyUploadHistory: AdminRoyaltyUploadHistoryItem[] = [
     recordsProcessed: 14876,
     totalAmount: 76543.21,
     status: "Completed",
-    processedBy: "admin@xdistromusic.com",
+    processedBy: "support@xdistromusic.com",
   },
   {
     id: 3,
@@ -32,6 +32,6 @@ export const mockAdminRoyaltyUploadHistory: AdminRoyaltyUploadHistoryItem[] = [
     recordsProcessed: 13245,
     totalAmount: 65432.1,
     status: "Completed",
-    processedBy: "admin@xdistromusic.com",
+    processedBy: "support@xdistromusic.com",
   },
 ];
