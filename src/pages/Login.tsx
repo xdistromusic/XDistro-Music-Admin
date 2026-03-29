@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Loader2, Mail, Lock, Shield, AlertCircle } from "lucide-react";
+import { Loader2, Mail, Lock, Shield, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,8 @@ const Login = () => {
       rememberMe: false,
     },
   });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsSubmitting(true);
@@ -106,10 +108,17 @@ const Login = () => {
                           <Lock className="absolute left-3 top-3 h-4 w-4 text-white/50" />
                           <Input
                             {...field}
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             placeholder="••••••••"
-                            className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                            className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
                           />
+                          <button
+                            type="button"
+                            className="absolute right-3 top-3 h-4 w-4 text-white/50 hover:text-white/70"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
                         </div>
                       </FormControl>
                       <FormMessage />
