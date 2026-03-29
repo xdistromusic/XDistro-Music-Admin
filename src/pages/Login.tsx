@@ -163,7 +163,12 @@ const Login = () => {
               </form>
             </Form>
 
-            <div className="mt-6 text-center">
+            <div className="mt-8 text-center">
+              <img 
+                src="/assets/xdistrologo.png" 
+                alt="XDistro Music"
+                className="h-16 mx-auto"
+              />
             </div>
           </div>
         </div>
