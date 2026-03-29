@@ -644,19 +644,19 @@ const AdminSettings = () => {
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">
-                {staffMembers.filter(s => s.status === 'Active').length}
+                {staffMembers.filter((s) => s.status === 'active').length}
               </div>
               <div className="text-sm text-gray-600">Active</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-600">
-                {staffMembers.filter(s => s.status === 'Inactive').length}
+                {staffMembers.filter((s) => s.status === 'inactive').length}
               </div>
               <div className="text-sm text-gray-600">Inactive</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-purple-600">
-                {staffMembers.filter(s => s.role === 'Super Admin').length}
+                {staffMembers.filter((s) => s.role === 'super_admin').length}
               </div>
               <div className="text-sm text-gray-600">Super Admins</div>
             </div>

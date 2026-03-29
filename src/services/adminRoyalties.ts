@@ -172,7 +172,7 @@ export const getAdminRoyaltyStats = async (): Promise<AdminRoyaltyStats> => {
     return payload.data || mockAdminRoyaltyStats;
   }
 
-  const payload = await requestJson<{ data?: AdminRoyaltyStats; stats?: AdminRoyaltyStats }>("/royalties/stats");
+  const payload = await requestAdminJson<{ data?: AdminRoyaltyStats; stats?: AdminRoyaltyStats }>("/royalties/stats");
   return payload.data || payload.stats || mockAdminRoyaltyStats;
 };
 
@@ -186,7 +186,7 @@ export const getAdminRoyaltyUploadHistory = async (): Promise<AdminRoyaltyUpload
     return payload.data || [];
   }
 
-  const payload = await requestJson<{
+  const payload = await requestAdminJson<{
     data?: AdminRoyaltyUploadHistoryItem[];
     uploads?: AdminRoyaltyUploadHistoryItem[];
   }>("/royalties/uploads");
@@ -231,7 +231,7 @@ export const uploadAdminRoyaltyFile = async (
     return payload.data;
   }
 
-  return requestJson<AdminRoyaltyUploadHistoryItem>("/royalties/upload", {
+  return requestAdminJson<AdminRoyaltyUploadHistoryItem>("/royalties/upload", {
     method: "POST",
     body: JSON.stringify({ fileName: input.file.name, period: input.period }),
   });

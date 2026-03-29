@@ -7,6 +7,19 @@ import { useAdminUsers } from "@/hooks/useAdminUsers";
 import { useAdminReleases } from "@/hooks/useAdminReleases";
 import { useAdminRoyaltyRequests } from "@/hooks/useAdminRoyaltyRequests";
 import { useAdminTakedownRequests } from "@/hooks/useAdminTakedownRequests";
+import {
+  AdminRelease,
+  AdminRoyaltyRequest,
+  AdminTakedownRequest,
+  AdminUserListItem,
+} from "@/types/admin";
+
+interface ActivityItem {
+  id: string;
+  type: "user" | "release" | "royalty" | "takedown";
+  message: string;
+  time: string;
+}
 
 const StatCardSkeleton = () => (
   <Card>
@@ -35,10 +48,10 @@ const AdminDashboard = () => {
     const royaltyRequests = royaltyRequestsData || [];
     const takedownRequests = takedownRequestsData || [];
 
-    const activeSubscribers = users.filter((u: any) => u.plan !== "Non Subscriber").length;
-    const pendingReleases = releases.filter((r: any) => r.status === "Submitted").length;
-    const pendingRoyaltyRequests = royaltyRequests.filter((r: any) => r.status === "Pending").length;
-    const totalAmountRequested = royaltyRequests.reduce((sum: number, r: any) => sum + r.amount, 0);
+    const activeSubscribers = users.filter((u: AdminUserListItem) => u.plan !== "Non Subscriber").length;
+    const pendingReleases = releases.filter((r: AdminRelease) => r.status === "Submitted").length;
+    const pendingRoyaltyRequests = royaltyRequests.filter((r: AdminRoyaltyRequest) => r.status === "Pending").length;
+    const totalAmountRequested = royaltyRequests.reduce((sum: number, r: AdminRoyaltyRequest) => sum + r.amount, 0);
 
     return {
       totalUsers: users.length,
@@ -53,11 +66,11 @@ const AdminDashboard = () => {
 
   // Build recent activity from actual data
   const recentActivity = useMemo(() => {
-    const activities: any[] = [];
+    const activities: ActivityItem[] = [];
 
     // Add recent users
     const users = usersData || [];
-    users.slice(0, 2).forEach((user: any) => {
+    users.slice(0, 2).forEach((user: AdminUserListItem) => {
       activities.push({
         id: `user-${user.id}`,
         type: "user",
@@ -68,7 +81,7 @@ const AdminDashboard = () => {
 
     // Add recent releases
     const releases = releasesData || [];
-    releases.slice(0, 2).forEach((release: any) => {
+    releases.slice(0, 2).forEach((release: AdminRelease) => {
       activities.push({
         id: `release-${release.id}`,
         type: "release",
@@ -79,7 +92,7 @@ const AdminDashboard = () => {
 
     // Add recent royalty requests
     const royaltyRequests = royaltyRequestsData || [];
-    royaltyRequests.slice(0, 2).forEach((request: any) => {
+    royaltyRequests.slice(0, 2).forEach((request: AdminRoyaltyRequest) => {
       activities.push({
         id: `royalty-${request.id}`,
         type: "royalty",
@@ -90,7 +103,7 @@ const AdminDashboard = () => {
 
     // Add recent takedown requests
     const takedownRequests = takedownRequestsData || [];
-    takedownRequests.slice(0, 1).forEach((request: any) => {
+    takedownRequests.slice(0, 1).forEach((request: AdminTakedownRequest) => {
       activities.push({
         id: `takedown-${request.id}`,
         type: "takedown",

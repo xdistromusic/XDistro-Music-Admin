@@ -1,5 +1,5 @@
-import { AdminPermission, AdminRouteConfig } from "@/config/adminRoutes";
-import { AdminUser } from "@/types/admin";
+import { AdminRouteConfig } from "@/config/adminRoutes";
+import { AdminPermission, AdminUser } from "@/types/admin";
 
 export const userCanAccessPermission = (
   user: AdminUser | null | undefined,
