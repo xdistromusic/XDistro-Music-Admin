@@ -146,10 +146,10 @@ const AdminRoyalties = () => {
   };
 
   const downloadTemplate = () => {
-    const csvContent = `ISRC,Artist_Name,Track_Title,Royalty_Amount,Currency,Period
-USRC17607839,John Doe,Summer Vibes,25.67,USD,2024-02
-USRC17607840,Jane Smith,Midnight Dreams,45.23,USD,2024-02
-USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2024-02`;
+    const csvContent = `ISRC Code,Track Artists,Track Title,Royalty ($US),Currency,Period,Digital Service Provider,Territory,Content Type,Sale or Void,Count
+USRC17607839,John Doe,Summer Vibes,25.67,USD,2025-12,Spotify,USA,Single,Sale,1250
+USRC17607840,Jane Smith,Midnight Dreams,45.23,USD,2025-12,Apple Music,GBR,Single,Sale,2100
+USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2025-12,Spotify,NGA,Single,Sale,450`;
 
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
