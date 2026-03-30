@@ -235,9 +235,9 @@ USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2024-02`;
             Only royalty lines that match tracks already in the system are stored and counted toward distribution totals. Unmatched rows are discarded after they are counted for audit summary.
           </p>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <div>
-              <div className="mb-4">
+          <div className="grid gap-6 md:grid-cols-2 md:items-stretch">
+            <div className="flex h-full flex-col">
+              <div className="mb-3">
                 <label htmlFor="royalty-period-month" className="block text-sm font-medium text-gray-700 mb-2">
                   Reporting Period
                 </label>
@@ -273,7 +273,7 @@ USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2024-02`;
               </div>
 
               <div
-                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-onerpm-orange transition-colors"
+                className="flex min-h-[168px] flex-1 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-300 px-6 py-8 text-center transition-colors hover:border-onerpm-orange md:min-h-[420px]"
                 onClick={() => fileInputRef.current?.click()}
               >
                 {isProcessing ? (
@@ -309,7 +309,7 @@ USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2024-02`;
               />
             </div>
 
-            <div className="space-y-4">
+            <div className="flex h-full flex-col space-y-4">
               <h4 className="font-semibold text-gray-900">CSV File Requirements:</h4>
               <ul className="space-y-2 text-gray-700 text-sm">
                 <li>• File must be in CSV format</li>
