@@ -175,11 +175,18 @@ export const getAdminRoyaltyStats = async (): Promise<AdminRoyaltyStats> => {
 
   if (adminBackendConfig.royaltyImportUrl) {
     const payload = await requestRoyaltyImport<{ data?: AdminRoyaltyStats }>("stats");
-    return payload.data || mockAdminRoyaltyStats;
+    if (!payload.data) {
+      throw new Error("Failed to load royalty stats");
+    }
+    return payload.data;
   }
 
   const payload = await requestAdminJson<{ data?: AdminRoyaltyStats; stats?: AdminRoyaltyStats }>("/royalties/stats");
-  return payload.data || payload.stats || mockAdminRoyaltyStats;
+  const stats = payload.data || payload.stats;
+  if (!stats) {
+    throw new Error("Failed to load royalty stats");
+  }
+  return stats;
 };
 
 export const getAdminRoyaltyUploadHistory = async (): Promise<AdminRoyaltyUploadHistoryItem[]> => {

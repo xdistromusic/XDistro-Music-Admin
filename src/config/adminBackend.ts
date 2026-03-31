@@ -7,18 +7,11 @@ export type AdminAuthMode = "dummy" | "rest";
 export type AdminDataMode = "dummy" | "rest";
 
 const resolveAuthMode = (): AdminAuthMode => {
-  return getEnvValue("VITE_ADMIN_AUTH_MODE") === "rest" ? "rest" : "dummy";
+  return "rest";
 };
 
 const resolveDataMode = (): AdminDataMode => {
-  const explicitMode = getEnvValue("VITE_ADMIN_DATA_MODE");
-  if (explicitMode === "rest") {
-    return "rest";
-  }
-  if (explicitMode === "dummy") {
-    return "dummy";
-  }
-  return resolveAuthMode();
+  return "rest";
 };
 
 export const adminBackendConfig = {
