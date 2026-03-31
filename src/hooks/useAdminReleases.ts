@@ -4,6 +4,7 @@ import {
   updateAdminReleaseStatus,
   updateAdminReleaseUpc,
   updateAdminTrackIsrc,
+  updateAdminTrackTikTokPreview,
 } from "@/services/adminReleases";
 import { AdminEntityId, AdminReleaseStatus } from "@/types/admin";
 
@@ -47,6 +48,26 @@ export const useUpdateAdminTrackIsrc = () => {
   return useMutation({
     mutationFn: ({ releaseId, trackId, isrc }: { releaseId: AdminEntityId; trackId: AdminEntityId; isrc: string }) =>
       updateAdminTrackIsrc(releaseId, trackId, isrc),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: adminReleasesQueryKey });
+    },
+  });
+};
+export const useUpdateAdminTrackTikTokPreview = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      releaseId,
+      trackId,
+      minutes,
+      seconds,
+    }: {
+      releaseId: AdminEntityId;
+      trackId: AdminEntityId;
+      minutes: number;
+      seconds: number;
+    }) => updateAdminTrackTikTokPreview(releaseId, trackId, minutes, seconds),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: adminReleasesQueryKey });
     },

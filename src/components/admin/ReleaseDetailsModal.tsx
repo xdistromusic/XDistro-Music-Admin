@@ -33,8 +33,11 @@ interface Track {
   tiktokPreviewMinutes?: number;
   tiktokPreviewSeconds?: number;
   primaryArtists: string[];
+  primaryArtistProfiles?: { name: string; profileUrl: string }[];
   additionalPrimaryArtists: string[];
+  additionalPrimaryArtistProfiles?: { name: string; profileUrl: string }[];
   featuredArtists: string[];
+  featuredArtistProfiles?: { name: string; profileUrl: string }[];
   songwriters: string[];
   producers: string[];
   performers: string[];
@@ -92,6 +95,13 @@ const ReleaseDetailsModal = ({
   const [tiktokPreviewValues, setTiktokPreviewValues] = useState<Record<string, { minutes: number; seconds: number }>>({});
   const [isDownloading, setIsDownloading] = useState(false);
 
+  const normalizeExternalUrl = (url?: string) => {
+    const trimmed = String(url ?? "").trim();
+    if (!trimmed) return "";
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  };
+
   if (!release) return null;
 
   const getStatusColor = (status: string) => {
@@ -138,6 +148,10 @@ const ReleaseDetailsModal = ({
   }));
 
   const selectedPlatforms = release.distributionPlatforms ?? [];
+  const releasePrimaryArtistProfileUrl = normalizeExternalUrl(
+    release.primaryArtistProfiles?.find((profile) => profile.name === release.artist)?.profileUrl
+      ?? release.primaryArtistProfiles?.[0]?.profileUrl
+  );
 
   const generateUpc = () => {
     // Generate UPC code
@@ -374,7 +388,41 @@ const ReleaseDetailsModal = ({
             <div className="flex-1 space-y-4">
               <div>
                 <h3 className="text-2xl font-bold text-gray-900">{release.title}</h3>
-                <p className="text-lg text-gray-600">by {release.artist}</p>
+                <p className="text-lg text-gray-600">
+                  by {releasePrimaryArtistProfileUrl ? (
+                    <a
+                      href={releasePrimaryArtistProfileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      {release.artist}
+                    </a>
+                  ) : (
+                    release.artist
+                  )}
+                  {release.additionalPrimaryArtistProfiles && release.additionalPrimaryArtistProfiles.length > 0 && (
+                    <span>
+                      {release.additionalPrimaryArtistProfiles.map((profile, i) => (
+                        <span key={i}>
+                          {" & "}
+                          {profile.profileUrl ? (
+                            <a
+                              href={profile.profileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              {profile.name}
+                            </a>
+                          ) : (
+                            profile.name
+                          )}
+                        </span>
+                      ))}
+                    </span>
+                  )}
+                </p>
                 {release.tracks > 1 && (
                   <div className="flex items-center gap-2 mt-2">
                     <Badge variant="outline" className="border-blue-300 text-blue-700">
@@ -532,8 +580,7 @@ const ReleaseDetailsModal = ({
                         
                         {/* ISRC Code Assignment */}
                         <div className="flex items-center gap-2 mt-2">
-                          <Hash className="w-3 h-3 text-gray-500" />
-                          <span className="text-xs text-gray-600">ISRC:</span>
+                          <span className="text-sm text-gray-600">ISRC:</span>
                           {editingIsrc === track.id ? (
                             <div className="flex items-center gap-2">
                               <Input
@@ -591,10 +638,7 @@ const ReleaseDetailsModal = ({
                         
                         {/* TikTok Preview Start Time */}
                         <div className="flex items-center gap-2 mt-2">
-                          <div className="w-4 h-4 bg-black rounded flex items-center justify-center">
-                            <span className="text-white text-xs font-bold">T</span>
-                          </div>
-                          <span className="text-xs text-gray-600">TikTok Preview:</span>
+                          <span className="text-sm text-gray-600">TikTok Preview:</span>
                           {editingTikTokPreview === track.id ? (
                             <div className="flex items-center gap-2">
                               <div className="flex items-center gap-1">
@@ -686,46 +730,73 @@ const ReleaseDetailsModal = ({
                         <p className="font-medium text-gray-700 mb-1">Primary Artists:</p>
                         <div className="space-y-1">
                           {track.primaryArtists.map((artist, i) => (
-                            <div key={i} className="flex items-center gap-2">
-                              <span>{artist}</span>
-                              <Button variant="ghost" size="sm" className="h-6 px-2">
-                                <ExternalLink className="w-3 h-3" />
-                              </Button>
-                            </div>
+                            (() => {
+                              const primaryProfileUrl = normalizeExternalUrl(
+                                track.primaryArtistProfiles?.find((profile) =>
+                                  profile.name.trim().toLowerCase() === artist.trim().toLowerCase()
+                                )?.profileUrl ||
+                                  release.primaryArtistProfiles?.find((profile) =>
+                                    profile.name.trim().toLowerCase() === artist.trim().toLowerCase()
+                                  )?.profileUrl ||
+                                  (track.primaryArtists.length === 1 ? release.primaryArtistProfiles?.[0]?.profileUrl : "")
+                              );
+
+                              return (
+                                <div key={i} className="flex items-center gap-2">
+                                  <span>{artist}</span>
+                                  {primaryProfileUrl ? (
+                                    <a
+                                      href={primaryProfileUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center text-onerpm-orange hover:text-onerpm-orange/80"
+                                      aria-label={`Open ${artist} profile`}
+                                    >
+                                      <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  ) : null}
+                                </div>
+                              );
+                            })()
                           ))}
                         </div>
  
-                        {track.additionalPrimaryArtists && track.additionalPrimaryArtists.length > 0 && (
-                          <>
-                            <p className="font-medium text-gray-700 mb-1 mt-3">Additional Primary Artists:</p>
-                            <div className="space-y-1">
-                              {track.additionalPrimaryArtists.map((artist, i) => (
-                                <div key={i} className="flex items-center gap-2">
-                                  <span>{artist}</span>
-                                  <Button variant="ghost" size="sm" className="h-6 px-2">
-                                    <ExternalLink className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                          </>
-                        )}
- 
-                        {track.featuredArtists && track.featuredArtists.length > 0 && (
+                        {(track.featuredArtists?.length || track.featuredArtistProfiles?.length) ? (
                           <>
                             <p className="font-medium text-gray-700 mb-1 mt-3">Featured Artists:</p>
                             <div className="space-y-1">
-                              {track.featuredArtists.map((artist, i) => (
-                                <div key={i} className="flex items-center gap-2">
-                                  <span>{artist}</span>
-                                  <Button variant="ghost" size="sm" className="h-6 px-2">
-                                    <ExternalLink className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              ))}
+                              {(track.featuredArtistProfiles && track.featuredArtistProfiles.length > 0
+                                ? track.featuredArtistProfiles
+                                : (track.featuredArtists || []).map((name) => ({ name, profileUrl: "" }))
+                              ).map((artistProfile, i) => {
+                                const artist = artistProfile.name;
+                                const profileUrl = normalizeExternalUrl(
+                                  artistProfile.profileUrl ||
+                                  track.featuredArtistProfiles?.find((profile) =>
+                                    profile.name.trim().toLowerCase() === artist.trim().toLowerCase()
+                                  )?.profileUrl ||
+                                  ""
+                                );
+                                return (
+                                  <div key={i} className="flex items-center gap-2">
+                                    <span>{artist}</span>
+                                    {profileUrl ? (
+                                      <a
+                                        href={profileUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center text-onerpm-orange hover:text-onerpm-orange/80"
+                                        aria-label={`Open ${artist} profile`}
+                                      >
+                                        <ExternalLink className="w-3 h-3" />
+                                      </a>
+                                    ) : null}
+                                  </div>
+                                );
+                              })}
                             </div>
                           </>
-                        )}
+                        ) : null}
                       </div>
 
                       <div>

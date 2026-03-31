@@ -84,8 +84,11 @@ export interface AdminReleaseTrack {
   tiktokPreviewMinutes?: number;
   tiktokPreviewSeconds?: number;
   primaryArtists: string[];
+  primaryArtistProfiles?: Array<{ name: string; profileUrl: string }>;
   additionalPrimaryArtists: string[];
+  additionalPrimaryArtistProfiles?: Array<{ name: string; profileUrl: string }>;
   featuredArtists: string[];
+  featuredArtistProfiles?: Array<{ name: string; profileUrl: string }>;
   songwriters: string[];
   producers: string[];
   performers: string[];
@@ -109,6 +112,8 @@ export interface AdminRelease {
   copyright?: string;
   copyrightYear?: string;
   language?: string;
+  primaryArtistProfiles?: Array<{ name: string; profileUrl: string }>;
+  additionalPrimaryArtistProfiles?: Array<{ name: string; profileUrl: string }>;
   trackList?: AdminReleaseTrack[];
 }
 

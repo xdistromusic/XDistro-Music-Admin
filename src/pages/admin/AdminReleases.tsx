@@ -13,6 +13,7 @@ import {
   useUpdateAdminReleaseStatus,
   useUpdateAdminReleaseUpc,
   useUpdateAdminTrackIsrc,
+  useUpdateAdminTrackTikTokPreview,
 } from "@/hooks/useAdminReleases";
 import { AdminEntityId, AdminRelease, AdminReleaseStatus } from "@/types/admin";
 
@@ -38,6 +39,7 @@ const AdminReleases = () => {
   const updateStatusMutation = useUpdateAdminReleaseStatus();
   const updateUpcMutation = useUpdateAdminReleaseUpc();
   const updateIsrcMutation = useUpdateAdminTrackIsrc();
+  const updateTikTokPreviewMutation = useUpdateAdminTrackTikTokPreview();
 
   const filteredReleases = releases.filter((release) => {
     const query = searchQuery.toLowerCase();
@@ -117,6 +119,16 @@ const AdminReleases = () => {
   const handleTrackIsrcUpdate = async (releaseId: AdminEntityId, trackId: AdminEntityId, isrc: string) => {
     await updateIsrcMutation.mutateAsync({ releaseId, trackId, isrc });
     toast.success("ISRC code updated for track");
+  };
+
+  const handleTikTokPreviewUpdate = async (
+    releaseId: AdminEntityId,
+    trackId: AdminEntityId,
+    minutes: number,
+    seconds: number
+  ) => {
+    await updateTikTokPreviewMutation.mutateAsync({ releaseId, trackId, minutes, seconds });
+    toast.success("TikTok preview time updated for track");
   };
 
   const handleViewDetails = (release: AdminRelease) => {
@@ -380,6 +392,9 @@ const AdminReleases = () => {
         onUpcUpdate={(releaseId, upc) => void handleUpcUpdate(releaseId, upc)}
         onIsrcUpdate={(releaseId, trackId, isrc) =>
           void handleTrackIsrcUpdate(releaseId, trackId, isrc)
+        }
+        onTikTokPreviewUpdate={(releaseId, trackId, minutes, seconds) =>
+          void handleTikTokPreviewUpdate(releaseId, trackId, minutes, seconds)
         }
       />
     </AdminPageLayout>
