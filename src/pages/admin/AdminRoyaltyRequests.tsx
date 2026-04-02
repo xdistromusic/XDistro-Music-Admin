@@ -133,7 +133,7 @@ const AdminRoyaltyRequests = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Processed Today</p>
+                  <p className="text-sm font-medium text-gray-600">Processed Requests</p>
                   <p className="text-2xl font-bold text-green-600">
                     {filteredRequests.filter(r => r.status === 'Processed').length}
                   </p>
