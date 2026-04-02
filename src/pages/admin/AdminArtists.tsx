@@ -187,7 +187,7 @@ const AdminArtists = () => {
                   {filteredArtists.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-500">
-                        No artists found for the current filters.
+                        No artists found.
                       </td>
                     </tr>
                   ) : filteredArtists.map((artist) => (

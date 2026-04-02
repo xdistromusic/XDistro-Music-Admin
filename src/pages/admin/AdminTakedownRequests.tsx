@@ -161,7 +161,7 @@ const AdminTakedownRequests = () => {
                   {filteredRequests.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500">
-                        No takedown requests found for the current filters.
+                        No takedown requests found.
                       </td>
                     </tr>
                   ) : filteredRequests.map((request) => (

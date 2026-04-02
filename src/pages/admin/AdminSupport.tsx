@@ -188,7 +188,7 @@ const AdminSupport = () => {
                 {filteredTickets.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-500">
-                      No support tickets found for the current filters.
+                      No support tickets found.
                     </td>
                   </tr>
                 ) : filteredTickets.map((ticket) => (

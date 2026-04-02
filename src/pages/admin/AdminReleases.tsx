@@ -257,7 +257,7 @@ const AdminReleases = () => {
                 {paginatedReleases.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="px-6 py-12 text-center text-sm text-gray-500">
-                      No releases found for the current filters.
+                      No releases found.
                     </td>
                   </tr>
                 ) : paginatedReleases.map((release) => (

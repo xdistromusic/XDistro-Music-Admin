@@ -211,7 +211,7 @@ const AdminUsers = () => {
                   {filteredUsers.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
-                        No users found for the current filters.
+                        No users found.
                       </td>
                     </tr>
                   ) : filteredUsers.map((user) => (
