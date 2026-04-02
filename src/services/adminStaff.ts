@@ -81,3 +81,15 @@ export const deleteAdminStaff = async (id: string): Promise<void> => {
 
   await requestAdminJson(`/staff/${id}`, { method: "DELETE" });
 };
+
+export const resendAdminInvite = async (id: string): Promise<{ message: string }> => {
+  if (isAdminDataDummyEnabled()) {
+    // Mock resend in dummy mode
+    return { message: "Invitation resent successfully" };
+  }
+
+  const payload = await requestAdminJson<{ message: string }>(`/staff/${id}/resend-invite`, {
+    method: "POST",
+  });
+  return payload;
+};

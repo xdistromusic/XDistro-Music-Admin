@@ -7,6 +7,7 @@ import { Suspense, useEffect } from "react";
 import AdminShellFallback from "@/components/admin/AdminShellFallback";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import AcceptAdminInvite from "./pages/AcceptAdminInvite";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 import { adminProtectedRoutes, getAdminPageTitle, prefetchAdminRoutes } from "@/config/adminRoutes";
@@ -49,6 +50,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Navigate to="/admin" replace />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/admin/accept-invite" element={<AcceptAdminInvite />} />
             <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
               {adminProtectedRoutes.map(({ path, component: Component }) => (
                 <Route
