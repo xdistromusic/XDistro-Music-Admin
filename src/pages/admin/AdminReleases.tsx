@@ -254,7 +254,13 @@ const AdminReleases = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedReleases.map((release) => (
+                {paginatedReleases.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="px-6 py-12 text-center text-sm text-gray-500">
+                      No releases found for the current filters.
+                    </td>
+                  </tr>
+                ) : paginatedReleases.map((release) => (
                   <tr key={release.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>

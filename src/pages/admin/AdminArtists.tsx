@@ -184,7 +184,13 @@ const AdminArtists = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredArtists.map((artist) => (
+                  {filteredArtists.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-500">
+                        No artists found for the current filters.
+                      </td>
+                    </tr>
+                  ) : filteredArtists.map((artist) => (
                     <tr key={artist.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">

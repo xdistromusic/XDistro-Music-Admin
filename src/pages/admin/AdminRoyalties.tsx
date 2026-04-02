@@ -441,7 +441,13 @@ USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2025-12,Spotify,NGA,Single,Sale,4
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {uploadHistory.map((upload) => (
+                {uploadHistory.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-500">
+                      No royalty uploads yet.
+                    </td>
+                  </tr>
+                ) : uploadHistory.map((upload) => (
                   <tr key={upload.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">

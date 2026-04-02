@@ -185,7 +185,13 @@ const AdminSupport = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredTickets.map((ticket) => (
+                {filteredTickets.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-500">
+                      No support tickets found for the current filters.
+                    </td>
+                  </tr>
+                ) : filteredTickets.map((ticket) => (
                   <tr key={ticket.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 align-top">
                       <div>
