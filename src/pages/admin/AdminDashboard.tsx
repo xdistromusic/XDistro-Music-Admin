@@ -1,13 +1,17 @@
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Music, DollarSign, UserCheck, TrendingUp, Calendar, AlertTriangle } from "lucide-react";
 import AdminPageLayout from "@/components/admin/AdminPageLayout";
+import { useAuth } from "@/hooks/useAuth";
 import { useAdminUsers } from "@/hooks/useAdminUsers";
 import { useAdminReleases } from "@/hooks/useAdminReleases";
 import { useAdminRoyaltyRequests } from "@/hooks/useAdminRoyaltyRequests";
 import { useAdminTakedownRequests } from "@/hooks/useAdminTakedownRequests";
+import { userCanAccessPermission } from "@/lib/adminPermissions";
 import {
+  AdminPermission,
   AdminRelease,
   AdminRoyaltyRequest,
   AdminTakedownRequest,
@@ -19,6 +23,14 @@ interface ActivityItem {
   type: "user" | "release" | "royalty" | "takedown";
   message: string;
   time: string;
+}
+
+interface QuickAction {
+  label: string;
+  path: string;
+  className: string;
+  icon: typeof Users;
+  permission: AdminPermission;
 }
 
 const StatCardSkeleton = () => (
@@ -36,10 +48,60 @@ const StatCardSkeleton = () => (
 );
 
 const AdminDashboard = () => {
+  const { user } = useAuth();
   const { data: usersData, isLoading: usersLoading } = useAdminUsers();
   const { data: releasesData, isLoading: releasesLoading } = useAdminReleases();
   const { data: royaltyRequestsData, isLoading: royaltyLoading } = useAdminRoyaltyRequests();
   const { data: takedownRequestsData, isLoading: takedownLoading } = useAdminTakedownRequests();
+
+  const quickActions = useMemo(() => {
+    const actions: QuickAction[] = [
+      {
+        label: "Manage Users",
+        path: "/admin/users",
+        className: "bg-onerpm-orange hover:bg-onerpm-orange/90",
+        icon: Users,
+        permission: "users",
+      },
+      {
+        label: "Review Releases",
+        path: "/admin/releases",
+        className: "bg-onerpm-purple hover:bg-onerpm-purple/90",
+        icon: Music,
+        permission: "releases",
+      },
+      {
+        label: "Upload Royalties",
+        path: "/admin/royalties",
+        className: "bg-onerpm-blue hover:bg-onerpm-blue/90",
+        icon: DollarSign,
+        permission: "royalties",
+      },
+      {
+        label: "Royalty Requests",
+        path: "/admin/royalty-requests",
+        className: "bg-onerpm-green hover:bg-onerpm-green/90",
+        icon: Calendar,
+        permission: "royalty_requests",
+      },
+      {
+        label: "Takedown Requests",
+        path: "/admin/takedown-requests",
+        className: "bg-red-600 hover:bg-red-700",
+        icon: AlertTriangle,
+        permission: "takedown_requests",
+      },
+      {
+        label: "Subscription Audit",
+        path: "/admin/subscription-audit",
+        className: "bg-gray-900 hover:bg-gray-800",
+        icon: AlertTriangle,
+        permission: "users",
+      },
+    ];
+
+    return actions.filter((action) => userCanAccessPermission(user, action.permission));
+  }, [user]);
 
   // Build stats from actual data
   const stats = useMemo(() => {
@@ -135,33 +197,105 @@ const AdminDashboard = () => {
     }
   };
 
-  const StatCard = ({ title, value, icon, trend, trendValue }: {
+  const canAccessUsers = userCanAccessPermission(user, "users");
+  const canAccessReleases = userCanAccessPermission(user, "releases");
+  const canAccessRoyaltyRequests = userCanAccessPermission(user, "royalty_requests");
+  const canAccessTakedowns = userCanAccessPermission(user, "takedown_requests");
+
+  const primaryStats = [
+    {
+      title: "Total Users",
+      value: stats.totalUsers,
+      icon: <Users className="w-6 h-6 text-onerpm-orange" />,
+      path: canAccessUsers ? "/admin/users" : undefined,
+    },
+    {
+      title: "Active Subscribers",
+      value: stats.activeSubscribers,
+      icon: <UserCheck className="w-6 h-6 text-onerpm-orange" />,
+      path: canAccessUsers ? "/admin/users" : undefined,
+    },
+    {
+      title: "Total Releases",
+      value: stats.totalReleases,
+      icon: <Music className="w-6 h-6 text-onerpm-orange" />,
+      path: canAccessReleases ? "/admin/releases" : undefined,
+    },
+  ];
+
+  const secondaryStats = [
+    {
+      title: "Pending Releases",
+      value: stats.pendingReleases,
+      icon: <Calendar className="w-6 h-6 text-onerpm-orange" />,
+      path: canAccessReleases ? "/admin/releases" : undefined,
+    },
+    {
+      title: "Royalty Requests",
+      value: stats.royaltyRequests,
+      icon: <DollarSign className="w-6 h-6 text-onerpm-orange" />,
+      path: canAccessRoyaltyRequests ? "/admin/royalty-requests" : undefined,
+    },
+    {
+      title: "Takedown Requests",
+      value: stats.takedownRequests,
+      icon: <AlertTriangle className="w-6 h-6 text-onerpm-orange" />,
+      path: canAccessTakedowns ? "/admin/takedown-requests" : undefined,
+    },
+  ];
+
+  const StatCard = ({ title, value, icon, path, trend, trendValue }: {
     title: string;
     value: string | number;
     icon: React.ReactNode;
+    path?: string;
     trend?: 'up' | 'down';
     trendValue?: string;
   }) => (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600">{title}</p>
-            <p className="text-2xl font-bold text-gray-900">{value.toLocaleString()}</p>
-            {trend && trendValue && (
-              <div className={`flex items-center mt-2 text-sm ${
-                trend === 'up' ? 'text-green-600' : 'text-red-600'
-              }`}>
-                <TrendingUp className={`w-4 h-4 mr-1 ${trend === 'down' ? 'rotate-180' : ''}`} />
-                <span>{trendValue}</span>
+    <Card className={`transition-shadow ${path ? "hover:shadow-lg" : ""}`}>
+      {path ? (
+        <Link to={path} className="block">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">{title}</p>
+                <p className="text-2xl font-bold text-gray-900">{value.toLocaleString()}</p>
+                {trend && trendValue && (
+                  <div className={`flex items-center mt-2 text-sm ${
+                    trend === 'up' ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    <TrendingUp className={`w-4 h-4 mr-1 ${trend === 'down' ? 'rotate-180' : ''}`} />
+                    <span>{trendValue}</span>
+                  </div>
+                )}
               </div>
-            )}
+              <div className="w-12 h-12 bg-onerpm-orange/10 rounded-lg flex items-center justify-center">
+                {icon}
+              </div>
+            </div>
+          </CardContent>
+        </Link>
+      ) : (
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">{title}</p>
+              <p className="text-2xl font-bold text-gray-900">{value.toLocaleString()}</p>
+              {trend && trendValue && (
+                <div className={`flex items-center mt-2 text-sm ${
+                  trend === 'up' ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  <TrendingUp className={`w-4 h-4 mr-1 ${trend === 'down' ? 'rotate-180' : ''}`} />
+                  <span>{trendValue}</span>
+                </div>
+              )}
+            </div>
+            <div className="w-12 h-12 bg-onerpm-orange/10 rounded-lg flex items-center justify-center">
+              {icon}
+            </div>
           </div>
-          <div className="w-12 h-12 bg-onerpm-orange/10 rounded-lg flex items-center justify-center">
-            {icon}
-          </div>
-        </div>
-      </CardContent>
+        </CardContent>
+      )}
     </Card>
   );
 
@@ -176,21 +310,9 @@ const AdminDashboard = () => {
             Array.from({ length: 3 }).map((_, i) => <StatCardSkeleton key={i} />)
           ) : (
             <>
-              <StatCard
-                title="Total Users"
-                value={stats.totalUsers}
-                icon={<Users className="w-6 h-6 text-onerpm-orange" />}
-              />
-              <StatCard
-                title="Active Subscribers"
-                value={stats.activeSubscribers}
-                icon={<UserCheck className="w-6 h-6 text-onerpm-orange" />}
-              />
-              <StatCard
-                title="Total Releases"
-                value={stats.totalReleases}
-                icon={<Music className="w-6 h-6 text-onerpm-orange" />}
-              />
+              {primaryStats.map((stat) => (
+                <StatCard key={stat.title} title={stat.title} value={stat.value} icon={stat.icon} path={stat.path} />
+              ))}
             </>
           )}
         </div>
@@ -199,47 +321,31 @@ const AdminDashboard = () => {
             Array.from({ length: 3 }).map((_, i) => <StatCardSkeleton key={i} />)
           ) : (
             <>
-              <StatCard
-                title="Pending Releases"
-                value={stats.pendingReleases}
-                icon={<Calendar className="w-6 h-6 text-onerpm-orange" />}
-              />
-              <StatCard
-                title="Royalty Requests"
-                value={stats.royaltyRequests}
-                icon={<DollarSign className="w-6 h-6 text-onerpm-orange" />}
-              />
-              <StatCard
-                title="Takedown Requests"
-                value={stats.takedownRequests}
-                icon={<AlertTriangle className="w-6 h-6 text-onerpm-orange" />}
-              />
+              {secondaryStats.map((stat) => (
+                <StatCard key={stat.title} title={stat.title} value={stat.value} icon={stat.icon} path={stat.path} />
+              ))}
             </>
           )}
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-          <Button className="bg-onerpm-orange hover:bg-onerpm-orange/90 text-white p-6 h-auto flex flex-col items-center space-y-2">
-            <Users className="w-6 h-6" />
-            <span>Manage Users</span>
-          </Button>
-          <Button className="bg-onerpm-purple hover:bg-onerpm-purple/90 text-white p-6 h-auto flex flex-col items-center space-y-2">
-            <Music className="w-6 h-6" />
-            <span>Review Releases</span>
-          </Button>
-          <Button className="bg-onerpm-blue hover:bg-onerpm-blue/90 text-white p-6 h-auto flex flex-col items-center space-y-2">
-            <DollarSign className="w-6 h-6" />
-            <span>Upload Royalties</span>
-          </Button>
-          <Button className="bg-onerpm-green hover:bg-onerpm-green/90 text-white p-6 h-auto flex flex-col items-center space-y-2">
-            <Calendar className="w-6 h-6" />
-            <span>Royalty Requests</span>
-          </Button>
-          <Button className="bg-red-600 hover:bg-red-700 text-white p-6 h-auto flex flex-col items-center space-y-2">
-            <AlertTriangle className="w-6 h-6" />
-            <span>Takedown Requests</span>
-          </Button>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+          {quickActions.map((action) => {
+            const Icon = action.icon;
+
+            return (
+              <Button
+                key={action.path}
+                asChild
+                className={`${action.className} text-white p-6 h-auto flex flex-col items-center space-y-2`}
+              >
+                <Link to={action.path}>
+                  <Icon className="w-6 h-6" />
+                  <span>{action.label}</span>
+                </Link>
+              </Button>
+            );
+          })}
         </div>
 
         {/* Recent Activity */}

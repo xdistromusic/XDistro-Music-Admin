@@ -9,6 +9,7 @@ const AdminReleases = lazy(() => import("@/pages/admin/AdminReleases"));
 const AdminRoyalties = lazy(() => import("@/pages/admin/AdminRoyalties"));
 const AdminRoyaltyRequests = lazy(() => import("@/pages/admin/AdminRoyaltyRequests"));
 const AdminSettings = lazy(() => import("@/pages/admin/AdminSettings"));
+const AdminSubscriptionAudit = lazy(() => import("@/pages/admin/AdminSubscriptionAudit"));
 const AdminSupport = lazy(() => import("@/pages/admin/AdminSupport"));
 const AdminTakedownRequests = lazy(() => import("@/pages/admin/AdminTakedownRequests"));
 const AdminUsers = lazy(() => import("@/pages/admin/AdminUsers"));
@@ -98,6 +99,15 @@ export const adminProtectedRoutes: AdminRouteConfig[] = [
     showInPrimaryNav: true,
   },
   {
+    path: "/admin/subscription-audit",
+    title: "Subscription Audit",
+    label: "Sub Audit",
+    icon: AlertTriangle,
+    component: AdminSubscriptionAudit,
+    requiredPermission: "users",
+    showInPrimaryNav: true,
+  },
+  {
     path: "/admin/settings",
     title: "System Settings",
     label: "Settings",
@@ -123,6 +133,7 @@ export const prefetchAdminRoutes = (): void => {
   void import("@/pages/admin/AdminRoyaltyRequests");
   void import("@/pages/admin/AdminTakedownRequests");
   void import("@/pages/admin/AdminSupport");
+  void import("@/pages/admin/AdminSubscriptionAudit");
   void import("@/pages/admin/AdminSettings");
 };
 

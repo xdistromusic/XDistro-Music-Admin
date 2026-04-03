@@ -263,3 +263,43 @@ export interface AdminRoyaltyNormalizationSummary {
   totalMatchedAmount: number;
   periodsTouched: string[];
 }
+
+export interface AdminSubscriptionAuditActiveSubscription {
+  id: string;
+  providerRef: string | null;
+  planId: string | null;
+  priceId: string | null;
+  paidDate: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  createdAt: string | null;
+}
+
+export interface AdminSubscriptionAuditDuplicateUser {
+  userId: string;
+  email: string;
+  name: string;
+  activeCount: number;
+  activeSubscriptions: AdminSubscriptionAuditActiveSubscription[];
+}
+
+export interface AdminSubscriptionAuditCleanupRow {
+  id: string;
+  userId: string;
+  email: string;
+  name: string;
+  providerRef: string | null;
+  paidDate: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  terminatedAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface AdminSubscriptionAuditReport {
+  generatedAt: string;
+  currentDuplicateActiveCount: number;
+  currentDuplicateActiveUsers: AdminSubscriptionAuditDuplicateUser[];
+  likelyDuplicateCleanupCount: number;
+  likelyDuplicateCleanupRows: AdminSubscriptionAuditCleanupRow[];
+}
