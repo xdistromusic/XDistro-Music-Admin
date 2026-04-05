@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteAdminUser,
   getAdminUsers,
+  getAdminUsersPage,
   updateAdminUserPlan,
   updateAdminUserStatus,
   updateAdminUserDetails,
@@ -15,6 +16,19 @@ export const useAdminUsers = () => {
   return useQuery({
     queryKey: adminUsersQueryKey,
     queryFn: getAdminUsers,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useAdminUsersPage = (
+  page: number,
+  pageSize: number,
+  search: string,
+  plan: "all" | SubscriptionPlanName
+) => {
+  return useQuery({
+    queryKey: [...adminUsersQueryKey, "page", page, pageSize, search, plan],
+    queryFn: () => getAdminUsersPage({ page, pageSize, search, plan }),
     refetchOnWindowFocus: false,
   });
 };

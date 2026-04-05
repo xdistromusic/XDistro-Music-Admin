@@ -82,8 +82,7 @@ const PaymentDetailsModal = ({ request, isOpen, onClose, onStatusUpdate }: Payme
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold flex items-center gap-3">
-            <DollarSign className="w-6 h-6 text-onerpm-orange" />
+          <DialogTitle className="text-2xl text-onerpm-orange font-bold flex items-center gap-3">
             Payment Request Details
           </DialogTitle>
         </DialogHeader>

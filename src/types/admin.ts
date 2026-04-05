@@ -73,6 +73,14 @@ export interface AdminUserListItem {
   status?: string;
 }
 
+export interface AdminUsersPage {
+  items: AdminUserListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export type AdminReleaseStatus = "Submitted" | "Approved" | "Rejected" | "Denied" | "Deleted";
 
 export interface AdminReleaseTrack {

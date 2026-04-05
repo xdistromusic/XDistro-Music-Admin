@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Download, Eye, Trash2, Mail, MapPin } from "lucide-react";
+import { Search, Download, Eye, Trash2, Mail, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "@/lib/toast";
 import AdminPageLayout from "@/components/admin/AdminPageLayout";
 import AdminPageLoader from "@/components/admin/AdminPageLoader";
@@ -10,36 +10,66 @@ import ActionConfirmationModal from "@/components/admin/ActionConfirmationModal"
 import UserDetailsModal from "@/components/admin/UserDetailsModal";
 import { AdminEntityId, AdminUserListItem, SubscriptionPlanName } from "@/types/admin";
 import {
-  useAdminUsers,
+  useAdminUsersPage,
   useDeleteAdminUser,
   useUpdateAdminUserPlan,
   useUpdateAdminUserStatus,
 } from "@/hooks/useAdminUsers";
 
 const PLAN_OPTIONS: Array<"all" | SubscriptionPlanName> = ["all", "Non Subscriber", "Artist", "Pro", "Label"];
+const PAGE_SIZE = 50;
+
+const formatShortUserId = (id: string) => {
+  if (!id) {
+    return "";
+  }
+
+  return id.length <= 6 ? id : `${id.slice(0, 6)}...`;
+};
+
+const formatShortEmail = (email: string) => {
+  if (!email) {
+    return "";
+  }
+
+  return email.length <= 26 ? email : `${email.slice(0, 26)}...`;
+};
 
 const AdminUsers = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [filterPlan, setFilterPlan] = useState<"all" | SubscriptionPlanName>("all");
+  const [page, setPage] = useState(1);
   const [selectedUserId, setSelectedUserId] = useState<AdminEntityId | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<AdminUserListItem | null>(null);
 
-  const { data: users = [], isLoading } = useAdminUsers();
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery.trim());
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearchQuery, filterPlan]);
+
+  const { data: usersPage, isLoading, isFetching } = useAdminUsersPage(
+    page,
+    PAGE_SIZE,
+    debouncedSearchQuery,
+    filterPlan
+  );
+  const users = usersPage?.items ?? [];
+  const totalUsers = usersPage?.total ?? 0;
+  const totalPages = usersPage?.totalPages ?? 1;
   const deleteUserMutation = useDeleteAdminUser();
   const updatePlanMutation = useUpdateAdminUserPlan();
   const updateStatusMutation = useUpdateAdminUserStatus();
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesPlan = filterPlan === "all" || user.plan === filterPlan;
-    
-    return matchesSearch && matchesPlan;
-  });
+  const filteredUsers = users;
 
   const getPlanColor = (plan: SubscriptionPlanName) => {
     switch (plan) {
@@ -170,7 +200,7 @@ const AdminUsers = () => {
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={exportUsers}>
                   <Download className="w-4 h-4 mr-2" />
-                  Export ({filteredUsers.length})
+                  Export (Page {users.length})
                 </Button>
               </div>
             </div>
@@ -180,29 +210,32 @@ const AdminUsers = () => {
         {/* Users Table */}
         <Card>
           <CardContent className="p-0">
-            <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-400px)]">
-              <table className="w-full">
+            {isFetching ? (
+              <div className="px-3 py-2 text-xs text-gray-500 border-b border-gray-100">Refreshing page...</div>
+            ) : null}
+            <div className="overflow-y-auto md:overflow-x-visible overflow-x-auto max-h-[calc(100vh-400px)]">
+              <table className="w-full table-fixed">
                 <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[22%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[26%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Email
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[16%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Country
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[14%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Plan
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[10%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Activity
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[7%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Earnings
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[3%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -210,59 +243,58 @@ const AdminUsers = () => {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
+                      <td colSpan={7} className="px-2 py-12 text-center text-sm text-gray-500">
                         No users found.
                       </td>
                     </tr>
                   ) : filteredUsers.map((user) => (
                     <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-2 py-3 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-gray-900 truncate" title={`${user.firstName} ${user.lastName}`}>
                               {user.firstName} {user.lastName}
                             </div>
-                            <div className="text-sm text-gray-500">ID: {user.id}</div>
+                            <div className="text-xs text-gray-500" title={user.id}>ID: {formatShortUserId(user.id)}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 flex items-center">
-                          <Mail className="w-4 h-4 mr-2 text-gray-400" />
-                          {user.email}
+                      <td className="px-2 py-3 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 flex items-center min-w-0">
+                          <Mail className="w-4 h-4 mr-1 text-gray-400 shrink-0" />
+                          <span className="truncate" title={user.email}>{formatShortEmail(user.email)}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-2 py-3 whitespace-nowrap">
                         <div className="text-sm text-gray-900 flex items-center">
-                          <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                          <MapPin className="w-4 h-4 mr-1 text-gray-400" />
                           {user.country}
                         </div>
-                        <div className="text-sm text-gray-500">Joined: {user.joinDate}</div>
+                        <div className="text-xs text-gray-500 truncate" title={`Joined: ${user.joinDate}`}>{user.joinDate}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-2 py-3 whitespace-nowrap">
                         <select
                           value={user.plan}
                           onChange={(e) => void handlePlanChange(user.id, e.target.value as SubscriptionPlanName)}
                           aria-label={`Change subscription plan for ${user.firstName} ${user.lastName}`}
                           title={`Change subscription plan for ${user.firstName} ${user.lastName}`}
-                          className={`text-xs border-0 rounded px-2 py-1 font-medium ${getPlanColor(user.plan)}`}
+                          className={`w-full max-w-[8.75rem] text-xs border-0 rounded px-2 py-1 font-medium ${getPlanColor(user.plan)}`}
                         >
-                          <option value="Non Subscriber">Non Subscriber</option>
+                          <option value="Non Subscriber">Non Sub</option>
                           <option value="Artist">Artist</option>
                           <option value="Pro">Pro</option>
                           <option value="Label">Label</option>
                         </select>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">
                         <div>{user.releases} releases</div>
-                        <div className="text-xs text-gray-500">Last: {user.lastLogin}</div>
+                        <div className="text-xs text-gray-500 truncate" title={`Last login: ${user.lastLogin}`}>{user.lastLogin}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">
                         <div className="font-medium">${user.totalEarnings.toFixed(2)}</div>
-                        <div className="text-xs text-gray-500">Total earned</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
+                      <td className="px-2 py-3 whitespace-nowrap text-sm font-medium">
+                        <div className="flex justify-start">
                           <Button 
                             variant="ghost" 
                             size="sm"
@@ -288,15 +320,47 @@ const AdminUsers = () => {
                 </tbody>
               </table>
             </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-3 py-3 border-t border-gray-100">
+              <div className="text-sm text-gray-600">
+                Page {page} of {totalPages} • {totalUsers} total users
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                  disabled={page <= 1 || isLoading}
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={page >= totalPages || isLoading}
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         {/* Summary Stats */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-6 gap-4">
           <Card>
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-gray-900">{filteredUsers.length}</div>
-              <div className="text-sm text-gray-600">Total Users</div>
+              <div className="text-sm text-gray-600">Users On Page</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-gray-900">{totalUsers}</div>
+              <div className="text-sm text-gray-600">All Users</div>
             </CardContent>
           </Card>
           <Card>
