@@ -32,7 +32,7 @@ const formatShortEmail = (email: string) => {
     return "";
   }
 
-  return email.length <= 22 ? email : `${email.slice(0, 22)}...`;
+  return email.length <= 26 ? email : `${email.slice(0, 26)}...`;
 };
 
 const AdminUsers = () => {
@@ -47,7 +47,7 @@ const AdminUsers = () => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery.trim());
-    }, 300);
+    }, 500);
 
     return () => clearTimeout(timeout);
   }, [searchQuery]);
@@ -210,7 +210,7 @@ const AdminUsers = () => {
         {/* Users Table */}
         <Card>
           <CardContent className="p-0">
-            {isFetching ? (
+            {isFetching && !searchQuery ? (
               <div className="px-3 py-2 text-xs text-gray-500 border-b border-gray-100">Refreshing page...</div>
             ) : null}
             <div className="overflow-y-auto md:overflow-x-visible overflow-x-auto max-h-[calc(100vh-400px)]">
@@ -220,22 +220,22 @@ const AdminUsers = () => {
                     <th className="w-[22%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       User
                     </th>
-                    <th className="w-[24%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[26%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Email
                     </th>
-                    <th className="w-[10%] pl-2 pr-1 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[16%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Country
                     </th>
-                    <th className="w-[12%] pl-1 pr-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[14%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Plan
                     </th>
-                    <th className="w-[13%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[10%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Activity
                     </th>
                     <th className="w-[7%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Earnings
                     </th>
-                    <th className="w-[12%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky right-0 bg-gray-50">
+                    <th className="w-[3%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -265,40 +265,42 @@ const AdminUsers = () => {
                           <span className="truncate" title={user.email}>{formatShortEmail(user.email)}</span>
                         </div>
                       </td>
-                      <td className="pl-2 pr-1 py-3 whitespace-nowrap">
+                      <td className="px-2 py-3 whitespace-nowrap">
                         <div className="text-sm text-gray-900 flex items-center">
                           <MapPin className="w-4 h-4 mr-1 text-gray-400" />
                           {user.country}
                         </div>
+                        <div className="text-xs text-gray-500 truncate" title={`Joined: ${user.joinDate}`}>{user.joinDate}</div>
                       </td>
-                      <td className="pl-1 pr-2 py-3 whitespace-nowrap">
+                      <td className="px-2 py-3 whitespace-nowrap">
                         <select
                           value={user.plan}
                           onChange={(e) => void handlePlanChange(user.id, e.target.value as SubscriptionPlanName)}
                           aria-label={`Change subscription plan for ${user.firstName} ${user.lastName}`}
                           title={`Change subscription plan for ${user.firstName} ${user.lastName}`}
-                          className={`w-full max-w-[7rem] text-xs border-0 rounded px-2 py-1 font-medium ${getPlanColor(user.plan)}`}
+                          className={`w-full max-w-[8.75rem] text-xs border-0 rounded px-2 py-1 font-medium ${getPlanColor(user.plan)}`}
                         >
-                          <option value="Non Subscriber">Non</option>
-                          <option value="Artist">Art</option>
+                          <option value="Non Subscriber">Non Sub</option>
+                          <option value="Artist">Artist</option>
                           <option value="Pro">Pro</option>
-                          <option value="Label">Lbl</option>
+                          <option value="Label">Label</option>
                         </select>
                       </td>
                       <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">
                         <div>{user.releases} releases</div>
+                        <div className="text-xs text-gray-500 truncate" title={`Last login: ${user.lastLogin}`}>{user.lastLogin}</div>
                       </td>
                       <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">
                         <div className="font-medium">${user.totalEarnings.toFixed(2)}</div>
                       </td>
-                      <td className="px-2 py-3 whitespace-nowrap text-sm font-medium sticky right-0 bg-white">
-                        <div className="flex justify-start gap-1">
+                      <td className="px-2 py-3 whitespace-nowrap text-sm font-medium">
+                        <div className="flex justify-start">
                           <Button 
                             variant="ghost" 
                             size="sm"
                             onClick={() => handleViewUser(user)}
                             title="View Details"
-                            className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -307,7 +309,7 @@ const AdminUsers = () => {
                             size="sm" 
                             onClick={() => void handleDeleteUser(user)}
                             title="Delete User"
-                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

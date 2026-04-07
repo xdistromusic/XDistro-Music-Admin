@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteAdminUser,
   getAdminUsers,
@@ -30,6 +30,7 @@ export const useAdminUsersPage = (
     queryKey: [...adminUsersQueryKey, "page", page, pageSize, search, plan],
     queryFn: () => getAdminUsersPage({ page, pageSize, search, plan }),
     refetchOnWindowFocus: false,
+    placeholderData: keepPreviousData,
   });
 };
 
