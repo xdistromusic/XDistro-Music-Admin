@@ -123,6 +123,8 @@ export interface AdminRelease {
   primaryArtistProfiles?: Array<{ name: string; profileUrl: string }>;
   additionalPrimaryArtistProfiles?: Array<{ name: string; profileUrl: string }>;
   trackList?: AdminReleaseTrack[];
+  fastlane?: boolean;
+  fastlane_purchased_at?: string;
 }
 
 export interface AdminArtist {

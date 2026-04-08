@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, Search, Eye, Check, X, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, Eye, Check, X, Clock, Zap } from "lucide-react";
 import { toast } from "@/lib/toast";
 import AdminPageLayout from "@/components/admin/AdminPageLayout";
 import AdminPageLoader from "@/components/admin/AdminPageLoader";
@@ -18,8 +18,9 @@ import {
 } from "@/hooks/useAdminReleases";
 import { AdminEntityId, AdminRelease, AdminReleaseStatus } from "@/types/admin";
 
-const RELEASE_STATUS_OPTIONS: Array<"all" | AdminReleaseStatus> = [
+const RELEASE_STATUS_OPTIONS: Array<"all" | AdminReleaseStatus | "fastlane"> = [
   "all",
+  "fastlane",
   "Approved",
   "Submitted",
   "Rejected",
@@ -31,7 +32,7 @@ const ITEMS_PER_PAGE = 1000;
 
 const AdminReleases = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"all" | AdminReleaseStatus>("all");
+  const [filterStatus, setFilterStatus] = useState<"all" | AdminReleaseStatus | "fastlane">("all");
   const [selectedReleaseId, setSelectedReleaseId] = useState<AdminEntityId | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -52,7 +53,9 @@ const AdminReleases = () => {
       release.artist.toLowerCase().includes(query) ||
       release.submittedBy.toLowerCase().includes(query);
 
-    const matchesFilter = filterStatus === "all" || release.status === filterStatus;
+    const matchesFilter =
+      filterStatus === "all" ||
+      (filterStatus === "fastlane" ? release.fastlane === true : release.status === filterStatus);
 
     return matchesSearch && matchesFilter;
   });
@@ -221,14 +224,14 @@ const AdminReleases = () => {
               </div>
               <select
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as "all" | AdminReleaseStatus)}
+                onChange={(e) => setFilterStatus(e.target.value as "all" | AdminReleaseStatus | "fastlane")}
                 aria-label="Filter releases by status"
                 title="Filter releases by status"
                 className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-onerpm-orange focus:border-transparent"
               >
                 {RELEASE_STATUS_OPTIONS.map((status) => (
                   <option key={status} value={status}>
-                    {status === "all" ? "All Status" : status}
+                    {status === "all" ? "All Status" : status === "fastlane" ? "⚡ FastLane" : status}
                   </option>
                 ))}
               </select>
@@ -264,7 +267,12 @@ const AdminReleases = () => {
                   <tr key={release.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{release.title}</div>
+                        <div className="flex items-center gap-1.5 text-sm font-medium text-gray-900">
+                          {release.title}
+                          {release.fastlane && (
+                            <Zap className="w-3.5 h-3.5 text-yellow-500 shrink-0" title="FastLane" />
+                          )}
+                        </div>
                         <div className="text-sm text-gray-500">by {release.artist}</div>
                         <div className="text-xs text-gray-400">Submitted: {release.submissionDate}</div>
                       </div>

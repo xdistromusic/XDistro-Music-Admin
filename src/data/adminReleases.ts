@@ -13,6 +13,8 @@ export const mockAdminReleases: AdminRelease[] = [
     genre: "Pop",
     tracks: 1,
     upc: "",
+    fastlane: true,
+    fastlane_purchased_at: "2024-03-10T10:30:00.000Z",
     coverArt: "https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=300",
     label: "Independent",
     copyright: "John Doe",

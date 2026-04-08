@@ -21,7 +21,8 @@ import {
   Edit,
   Hash,
   Users,
-  Loader2
+  Loader2,
+  Zap
 } from "lucide-react";
 
 interface Track {
@@ -66,6 +67,8 @@ interface Release {
   distributionPlatforms?: string[];
   primaryArtistProfiles?: { name: string; profileUrl: string }[];
   additionalPrimaryArtistProfiles?: { name: string; profileUrl: string }[];
+  fastlane?: boolean;
+  fastlane_purchased_at?: string;
 }
 
 interface ReleaseDetailsModalProps {
@@ -428,6 +431,18 @@ const ReleaseDetailsModal = ({
                     <Badge variant="outline" className="border-blue-300 text-blue-700">
                       <Users className="w-3 h-3 mr-1" />
                       {release.tracks} Tracks • {getTotalDuration()} Total
+                    </Badge>
+                    {release.fastlane && (
+                      <Badge className="bg-yellow-100 text-yellow-800 border border-yellow-300 flex items-center gap-1">
+                        <Zap className="w-3 h-3" /> FastLane
+                      </Badge>
+                    )}
+                  </div>
+                )}
+                {release.tracks <= 1 && release.fastlane && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge className="bg-yellow-100 text-yellow-800 border border-yellow-300 flex items-center gap-1">
+                      <Zap className="w-3 h-3" /> FastLane
                     </Badge>
                   </div>
                 )}

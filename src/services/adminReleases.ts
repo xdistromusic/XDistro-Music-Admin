@@ -208,6 +208,8 @@ const normalizeRelease = (release: any): AdminRelease => {
     additionalPrimaryArtistProfiles,
     trackList,
     tracks: Number(release?.tracks ?? trackList.length ?? 0),
+    fastlane: Boolean(release?.fastlane ?? release?.fastlane_enabled ?? false),
+    fastlane_purchased_at: release?.fastlane_purchased_at ?? release?.fastlanePurchasedAt ?? undefined,
   } as AdminRelease;
 };
 
@@ -227,7 +229,7 @@ const readStoredReleases = (): AdminRelease[] => {
     }
 
     // Re-seed if stored data is missing fields added in newer mock versions
-    const isStale = parsed.some((r) => r.copyrightYear === undefined);
+    const isStale = parsed.some((r) => r.copyrightYear === undefined || r.fastlane === undefined);
     if (isStale) {
       localStorage.setItem(ADMIN_RELEASES_KEY, JSON.stringify(mockAdminReleases));
       return mockAdminReleases;
