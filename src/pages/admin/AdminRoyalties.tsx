@@ -92,11 +92,15 @@ const AdminRoyalties = () => {
 
     try {
       const newUpload = await uploadRoyaltyFileMutation.mutateAsync({ file, period });
+      const rateBreakdown =
+        newUpload.lapsedAllocations !== undefined && newUpload.activeAllocations !== undefined
+          ? ` — ${newUpload.activeAllocations} at 100%, ${newUpload.lapsedAllocations} at 70% (lapsed)`
+          : "";
       toast.success(
-        `Successfully processed ${newUpload.recordsProcessed} royalty records for ${newUpload.period || period}`
+        `Successfully processed ${newUpload.recordsProcessed} royalty records for ${newUpload.period || period}${rateBreakdown}`
       );
-    } catch {
-      toast.error("Failed to process royalty file");
+    } catch (error) {
+      toast.error((error as Error)?.message || "Failed to process royalty file");
     } finally {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -434,6 +438,11 @@ USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2025-12,Spotify,NGA,Single,Sale,4
                       {(upload.matchedRows !== undefined || upload.unmatchedRows !== undefined) && (
                         <div className="text-xs text-gray-500">
                           Matched: {upload.matchedRows ?? 0} | Unmatched: {upload.unmatchedRows ?? 0}
+                        </div>
+                      )}
+                      {upload.lapsedAllocations !== undefined && upload.lapsedAllocations > 0 && (
+                        <div className="text-xs text-amber-600">
+                          {upload.activeAllocations ?? 0} at 100% / {upload.lapsedAllocations} at 70% (lapsed)
                         </div>
                       )}
                     </td>

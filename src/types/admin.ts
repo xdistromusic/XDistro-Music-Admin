@@ -247,6 +247,8 @@ export interface AdminRoyaltyUploadHistoryItem {
   unmatchedRows?: number;
   replacedRows?: number;
   totalAmount: number;
+  lapsedAllocations?: number;
+  activeAllocations?: number;
   status: AdminRoyaltyUploadStatus;
   processedBy: string;
 }
