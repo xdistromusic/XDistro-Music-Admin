@@ -1,10 +1,11 @@
-import { Home, Users, Music, UserRound, DollarSign, Settings, TriangleAlert as AlertTriangle, MessageSquare } from "lucide-react";
+import { Home, Users, Music, UserRound, DollarSign, Settings, TriangleAlert as AlertTriangle, MessageSquare, ChartNoAxesColumn } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { lazy, type ComponentType, type LazyExoticComponent } from "react";
 import { AdminPermission } from "@/types/admin";
 
 const AdminArtists = lazy(() => import("@/pages/admin/AdminArtists"));
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
+const AdminFinancials = lazy(() => import("@/pages/admin/AdminFinancials"));
 const AdminReleases = lazy(() => import("@/pages/admin/AdminReleases"));
 const AdminRoyalties = lazy(() => import("@/pages/admin/AdminRoyalties"));
 const AdminRoyaltyRequests = lazy(() => import("@/pages/admin/AdminRoyaltyRequests"));
@@ -72,6 +73,14 @@ export const adminProtectedRoutes: AdminRouteConfig[] = [
     showInPrimaryNav: true,
   },
   {
+    path: "/admin/financials",
+    title: "Financials",
+    label: "Financials",
+    icon: ChartNoAxesColumn,
+    component: AdminFinancials,
+    requiredPermission: "royalties",
+  },
+  {
     path: "/admin/royalty-requests",
     title: "Royalty Requests",
     label: "Withdrawals",
@@ -105,7 +114,6 @@ export const adminProtectedRoutes: AdminRouteConfig[] = [
     icon: AlertTriangle,
     component: AdminSubscriptionAudit,
     requiredPermission: "users",
-    showInPrimaryNav: true,
   },
   {
     path: "/admin/settings",
@@ -130,6 +138,7 @@ export const prefetchAdminRoutes = (): void => {
   void import("@/pages/admin/AdminReleases");
   void import("@/pages/admin/AdminArtists");
   void import("@/pages/admin/AdminRoyalties");
+  void import("@/pages/admin/AdminFinancials");
   void import("@/pages/admin/AdminRoyaltyRequests");
   void import("@/pages/admin/AdminTakedownRequests");
   void import("@/pages/admin/AdminSupport");

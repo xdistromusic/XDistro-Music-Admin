@@ -315,3 +315,30 @@ export interface AdminSubscriptionAuditReport {
   likelyDuplicateCleanupCount: number;
   likelyDuplicateCleanupRows: AdminSubscriptionAuditCleanupRow[];
 }
+
+export interface AdminFinancialPlanDistributionItem {
+  planId: string;
+  planName: string;
+  count: number;
+}
+
+export interface AdminFinancialRenewalPeriodItem {
+  period: string;
+  renewals: number;
+}
+
+export interface AdminFinancialMostSubscribedPlan {
+  planId: string;
+  planName: string;
+  count: number;
+}
+
+export interface AdminFinancialReport {
+  generatedAt: string;
+  allTimeSubscriptions: number;
+  usersEverSubscribed: number;
+  renewalEventsCount: number;
+  mostSubscribedPlan: AdminFinancialMostSubscribedPlan | null;
+  planDistribution: AdminFinancialPlanDistributionItem[];
+  renewalsByPeriod: AdminFinancialRenewalPeriodItem[];
+}

@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Save, RefreshCw, Shield, Mail, DollarSign, Globe, Database, Bell, Users, FileText, Lock, Eye, EyeOff, CircleAlert as AlertCircle, Check, X, Upload, Download, UserPlus, Pencil, Trash2, Crown, User as UserIcon, Loader2 } from "lucide-react";
+import { Settings, Save, RefreshCw, Shield, Mail, DollarSign, Globe, Database, Bell, Users, FileText, Lock, Eye, EyeOff, CircleAlert as AlertCircle, Check, X, Upload, Download, UserPlus, Pencil, Trash2, Crown, User as UserIcon, Loader2, ChartNoAxesColumn } from "lucide-react";
 import { toast } from "sonner";
 import AdminNavbar from "@/components/admin/AdminNavbar";
 import AdminFooter from "@/components/admin/AdminFooter";
+import { FinancialsContent } from "@/pages/admin/AdminFinancials";
+import { SubscriptionAuditContent } from "@/pages/admin/AdminSubscriptionAudit";
 import StaffMemberFormModal from "@/components/admin/StaffMemberFormModal";
 import ActionConfirmationModal from "@/components/admin/ActionConfirmationModal";
 import { useAuth } from "@/hooks/useAuth";
@@ -291,7 +293,9 @@ const AdminSettings = () => {
   const tabs = [
     { id: "user", label: "User Profile", icon: UserIcon },
     { id: "integrations", label: "Integrations", icon: Database },
-    { id: "staff-access", label: "Staff Access", icon: Users }
+    { id: "staff-access", label: "Staff Access", icon: Users },
+    { id: "financials", label: "Financials", icon: ChartNoAxesColumn },
+    { id: "subscription-audit", label: "Sub Audit", icon: AlertCircle },
   ];
 
   const renderIntegrationsSettings = () => (
@@ -668,6 +672,10 @@ const AdminSettings = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case "financials":
+        return <FinancialsContent />;
+      case "subscription-audit":
+        return <SubscriptionAuditContent />;
       case "user":
         return (
           <div className="space-y-6">

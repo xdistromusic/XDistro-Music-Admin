@@ -16,14 +16,10 @@ const formatDateTime = (value?: string | null): string => {
   return date.toLocaleString();
 };
 
-const AdminSubscriptionAudit = () => {
+export const SubscriptionAuditContent = () => {
   const { data, isLoading, isFetching, refetch, error } = useAdminSubscriptionAudit();
 
   return (
-    <AdminPageLayout
-      title="Subscription Audit"
-      subtitle="Track duplicate active subscriptions and duplicate-cleanup activity."
-    >
       <div className="space-y-6">
         <Card>
           <CardContent className="p-6">
@@ -164,8 +160,16 @@ const AdminSubscriptionAudit = () => {
           </CardContent>
         </Card>
       </div>
-    </AdminPageLayout>
   );
 };
+
+const AdminSubscriptionAudit = () => (
+  <AdminPageLayout
+    title="Subscription Audit"
+    subtitle="Track duplicate active subscriptions and duplicate-cleanup activity."
+  >
+    <SubscriptionAuditContent />
+  </AdminPageLayout>
+);
 
 export default AdminSubscriptionAudit;
