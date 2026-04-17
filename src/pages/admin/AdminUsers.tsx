@@ -87,6 +87,18 @@ const AdminUsers = () => {
     }
   };
 
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case "Suspended":
+        return "bg-yellow-100 text-yellow-800";
+      case "Disabled":
+        return "bg-red-100 text-red-800";
+      case "Active":
+      default:
+        return "bg-green-100 text-green-800";
+    }
+  };
+
   const handleViewUser = (user: AdminUserListItem) => {
     setSelectedUserId(user.id);
     setIsModalOpen(true);
@@ -236,6 +248,9 @@ const AdminUsers = () => {
                     <th className="w-[14%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Plan
                     </th>
+                    <th className="w-[12%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
                     <th className="w-[10%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Activity
                     </th>
@@ -292,6 +307,13 @@ const AdminUsers = () => {
                           <option value="Pro">Pro</option>
                           <option value="Label">Label</option>
                         </select>
+                      </td>
+                      <td className="px-2 py-3 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(user.status ?? "Active")}`}
+                        >
+                          {user.status ?? "Active"}
+                        </span>
                       </td>
                       <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">
                         <div>{user.releases} releases</div>
