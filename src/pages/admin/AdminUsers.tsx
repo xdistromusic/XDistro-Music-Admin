@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Download, Eye, Trash2, Mail, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Download, Eye, Mail, MapPin, ChevronLeft, ChevronRight, Ban } from "lucide-react";
 import { toast } from "@/lib/toast";
 import AdminPageLayout from "@/components/admin/AdminPageLayout";
 import AdminPageLoader from "@/components/admin/AdminPageLoader";
@@ -11,7 +11,7 @@ import UserDetailsModal from "@/components/admin/UserDetailsModal";
 import { AdminEntityId, AdminUserListItem, SubscriptionPlanName } from "@/types/admin";
 import {
   useAdminUsersPage,
-  useDeleteAdminUser,
+  useSuspendAdminUser,
   useUpdateAdminUserPlan,
   useUpdateAdminUserStatus,
 } from "@/hooks/useAdminUsers";
@@ -42,7 +42,8 @@ const AdminUsers = () => {
   const [page, setPage] = useState(1);
   const [selectedUserId, setSelectedUserId] = useState<AdminEntityId | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<AdminUserListItem | null>(null);
+  const [userToSuspend, setUserToSuspend] = useState<AdminUserListItem | null>(null);
+  const [suspensionReason, setSuspensionReason] = useState("");
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -65,7 +66,7 @@ const AdminUsers = () => {
   const users = usersPage?.items ?? [];
   const totalUsers = usersPage?.total ?? 0;
   const totalPages = usersPage?.totalPages ?? 1;
-  const deleteUserMutation = useDeleteAdminUser();
+  const suspendUserMutation = useSuspendAdminUser();
   const updatePlanMutation = useUpdateAdminUserPlan();
   const updateStatusMutation = useUpdateAdminUserStatus();
 
@@ -91,18 +92,24 @@ const AdminUsers = () => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteUser = (user: AdminUserListItem) => {
-    setUserToDelete(user);
+  const handleSuspendUser = (user: AdminUserListItem) => {
+    setUserToSuspend(user);
+    setSuspensionReason("");
   };
 
-  const confirmDeleteUser = async () => {
-    if (!userToDelete) {
+  const confirmSuspendUser = async () => {
+    if (!userToSuspend || !suspensionReason.trim()) {
+      toast.error("Please provide a suspension reason");
       return;
     }
 
-    await deleteUserMutation.mutateAsync(userToDelete.id);
-    toast.success(`User ${userToDelete.firstName} ${userToDelete.lastName} has been deleted`);
-    setUserToDelete(null);
+    await suspendUserMutation.mutateAsync({
+      userId: userToSuspend.id,
+      reason: suspensionReason,
+    });
+    toast.success(`User ${userToSuspend.firstName} ${userToSuspend.lastName} has been suspended`);
+    setUserToSuspend(null);
+    setSuspensionReason("");
   };
 
   const handleStatusChange = async (userId: AdminEntityId, newStatus: string) => {
@@ -307,11 +314,11 @@ const AdminUsers = () => {
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            onClick={() => void handleDeleteUser(user)}
-                            title="Delete User"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => void handleSuspendUser(user)}
+                            title="Suspend User Account"
+                            className="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Ban className="w-4 h-4" />
                           </Button>
                         </div>
                       </td>
@@ -406,22 +413,42 @@ const AdminUsers = () => {
       />
 
       <ActionConfirmationModal
-        open={!!userToDelete}
+        open={!!userToSuspend}
         onOpenChange={(open) => {
           if (!open) {
-            setUserToDelete(null);
+            setUserToSuspend(null);
+            setSuspensionReason("");
           }
         }}
-        title="Delete User"
+        title="Suspend User Account"
         description={
-          userToDelete
-            ? `Are you sure you want to delete ${userToDelete.firstName} ${userToDelete.lastName}? This action cannot be undone.`
+          userToSuspend
+            ? `Suspend ${userToSuspend.firstName} ${userToSuspend.lastName}? They will be unable to log in and their account will be restricted.`
             : ""
         }
-        confirmLabel="Delete"
-        onConfirm={confirmDeleteUser}
-        isConfirming={deleteUserMutation.isPending}
-      />
+        confirmLabel="Suspend"
+        onConfirm={confirmSuspendUser}
+        isConfirming={suspendUserMutation.isPending}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Suspension Reason *
+            </label>
+            <textarea
+              value={suspensionReason}
+              onChange={(e) => setSuspensionReason(e.target.value)}
+              placeholder="Enter the reason for suspending this account (required)"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-onerpm-orange focus:border-transparent"
+              rows={3}
+              disabled={suspendUserMutation.isPending}
+            />
+            {!suspensionReason.trim() && (
+              <p className="mt-1 text-xs text-red-600">Suspension reason is required</p>
+            )}
+          </div>
+        </div>
+      </ActionConfirmationModal>
     </AdminPageLayout>
   );
 };

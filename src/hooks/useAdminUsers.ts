@@ -1,6 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteAdminUser,
+  suspendAdminUser,
   getAdminUsers,
   getAdminUsersPage,
   updateAdminUserPlan,
@@ -39,6 +40,18 @@ export const useDeleteAdminUser = () => {
 
   return useMutation({
     mutationFn: (userId: AdminEntityId) => deleteAdminUser(userId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: adminUsersQueryKey });
+    },
+  });
+};
+
+export const useSuspendAdminUser = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId, reason }: { userId: AdminEntityId; reason: string }) =>
+      suspendAdminUser(userId, reason),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: adminUsersQueryKey });
     },

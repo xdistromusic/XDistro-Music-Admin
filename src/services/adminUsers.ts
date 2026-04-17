@@ -121,6 +121,21 @@ export const deleteAdminUser = async (userId: AdminEntityId): Promise<void> => {
   await requestAdminJson(`/users/${userId}`, { method: "DELETE" });
 };
 
+export const suspendAdminUser = async (userId: AdminEntityId, reason: string): Promise<void> => {
+  if (isAdminDataDummyEnabled()) {
+    const users = readStoredUsers().map((user) => 
+      user.id === userId ? { ...user, status: "Suspended" } : user
+    );
+    writeStoredUsers(users);
+    return;
+  }
+
+  await requestAdminJson(`/users/${userId}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status: "Suspended", reason }),
+  });
+};
+
 export const updateAdminUserPlan = async (userId: AdminEntityId, plan: SubscriptionPlanName): Promise<void> => {
   if (isAdminDataDummyEnabled()) {
     const users = readStoredUsers().map((user) => (user.id === userId ? { ...user, plan } : user));

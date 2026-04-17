@@ -17,6 +17,7 @@ interface ActionConfirmationModalProps {
   cancelLabel?: string;
   onConfirm: () => void | Promise<void>;
   isConfirming?: boolean;
+  children?: React.ReactNode;
 }
 
 const ActionConfirmationModal = ({
@@ -28,6 +29,7 @@ const ActionConfirmationModal = ({
   cancelLabel = "Cancel",
   onConfirm,
   isConfirming = false,
+  children,
 }: ActionConfirmationModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -36,6 +38,7 @@ const ActionConfirmationModal = ({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
+        {children && <div className="py-4">{children}</div>}
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isConfirming}>
             {cancelLabel}
