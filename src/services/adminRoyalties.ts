@@ -302,6 +302,24 @@ export const runAdminRoyaltyRetentionCleanup = async (
   return payload.data;
 };
 
+export const resyncAdminRoyaltyPeriod = async (period: string): Promise<void> => {
+  if (isAdminDataDummyEnabled()) {
+    return;
+  }
+
+  if (!adminBackendConfig.royaltyImportUrl) {
+    throw new Error("VITE_ADMIN_ROYALTY_IMPORT_URL is not configured.");
+  }
+
+  await requestRoyaltyImport<{ data?: unknown }>(undefined, {
+    method: "POST",
+    body: JSON.stringify({
+      mode: "resync",
+      period,
+    }),
+  });
+};
+
 export const runAdminRoyaltyImportNormalization = async (): Promise<AdminRoyaltyNormalizationSummary> => {
   if (isAdminDataDummyEnabled()) {
     return {

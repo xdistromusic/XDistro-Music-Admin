@@ -2,7 +2,7 @@ import { ChangeEvent, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Download, FileText, Check, AlertCircle, DollarSign } from "lucide-react";
+import { Upload, Download, FileText, Check, AlertCircle, DollarSign, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import AdminPageLayout from "@/components/admin/AdminPageLayout";
 import AdminPageLoader from "@/components/admin/AdminPageLoader";
@@ -12,6 +12,7 @@ import {
   useAdminRoyaltyStats,
   useAdminRoyaltyUploadHistory,
   useUploadAdminRoyaltyFile,
+  useResyncAdminRoyaltyPeriod,
 } from "@/hooks/useAdminRoyalties";
 
 const ADMIN_RETENTION_SUMMARY_KEY = "admin:royalty-retention:last-summary";
@@ -27,6 +28,8 @@ const AdminRoyalties = () => {
   const { data: uploadHistory = [], isLoading: isUploadHistoryLoading } = useAdminRoyaltyUploadHistory();
   const uploadRoyaltyFileMutation = useUploadAdminRoyaltyFile();
   const retentionCleanupMutation = useRunAdminRoyaltyRetentionCleanup();
+  const resyncMutation = useResyncAdminRoyaltyPeriod();
+  const [resyncingPeriod, setResyncingPeriod] = useState<string | null>(null);
   const isProcessing = uploadRoyaltyFileMutation.isPending;
   const isRunningRetentionCleanup = retentionCleanupMutation.isPending;
   const isLoading = isStatsLoading || isUploadHistoryLoading;
@@ -128,6 +131,22 @@ const AdminRoyalties = () => {
       toast.success(`${dryRun ? "Cleanup preview" : "Retention cleanup"} complete: ${reportSummary}; ${trackSummary}.`);
     } catch (error) {
       toast.error((error as Error).message || "Failed to run retention cleanup.");
+    }
+  };
+
+  const handleResync = async (period: string) => {
+    if (!period) {
+      toast.error("This upload has no period set — cannot re-sync.");
+      return;
+    }
+    setResyncingPeriod(period);
+    try {
+      await resyncMutation.mutateAsync(period);
+      toast.success(`Allocations re-synced for period ${period}.`);
+    } catch (error) {
+      toast.error((error as Error)?.message || "Failed to re-sync period.");
+    } finally {
+      setResyncingPeriod(null);
     }
   };
 
@@ -412,6 +431,9 @@ USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2025-12,Spotify,NGA,Single,Sale,4
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Processed By
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -459,6 +481,18 @@ USRC17607841,Mike Wilson,Rock Anthem,12.45,USD,2025-12,Spotify,NGA,Single,Sale,4
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{upload.processedBy}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={resyncingPeriod === upload.period || isProcessing}
+                        onClick={() => handleResync(upload.period ?? "")}
+                        title={`Re-sync allocations for period ${upload.period}`}
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${resyncingPeriod === upload.period ? "animate-spin" : ""}`} />
+                        {resyncingPeriod === upload.period ? "Syncing..." : "Re-sync"}
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
