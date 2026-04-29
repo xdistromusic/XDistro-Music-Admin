@@ -152,6 +152,7 @@ export interface AdminRoyaltyPaymentMethod {
   routingNumber?: string;
   bankName?: string;
   accountHolder?: string;
+  country?: string;
   swiftCode?: string;
   iban?: string;
   paypalEmail?: string;

@@ -34,7 +34,7 @@ const PaymentDetailsModal = ({ request, isOpen, onClose, onStatusUpdate }: Payme
   const getPaymentMethodIcon = (type: string) => {
     switch (type.toLowerCase()) {
       case 'bank':
-        return <Bank className="w-5 h-5" />;
+        return <CreditCard className="w-5 h-5" />;
       case 'paypal':
         return <CreditCard className="w-5 h-5" />;
       default:
@@ -59,23 +59,19 @@ const PaymentDetailsModal = ({ request, isOpen, onClose, onStatusUpdate }: Payme
     }).format(amount);
   };
 
-  // Mock data for demonstration
+  // Helper to check if a value should be displayed
+  const hasValue = (val: unknown): boolean => {
+    return val != null && val !== '';
+  };
+
+  // Enhanced request with proper field mapping - no mock data needed since backend should provide all fields
   const enhancedRequest = {
     ...request,
     paymentMethod: {
       ...request.paymentMethod,
-      accountNumber: request.paymentMethod.type === 'bank' ? request.paymentMethod.accountNumber : undefined,
-      
-      routingNumber: request.paymentMethod.type === 'bank' ? request.paymentMethod.routingNumber : undefined,
-      
-      bankName: request.paymentMethod.type === 'bank' ? request.paymentMethod.bankName : undefined,
-
-      accountType: request.paymentMethod.type === 'bank' ? request.paymentMethod.accountType : undefined,      
-      
-      accountHolder: request.artistName,
-      
-      paypalEmail: request.paymentMethod.type === 'paypal' ? request.paymentMethod.paypalEmail : undefined
-    } 
+      // Ensure accountHolder falls back to artistName if not provided
+      accountHolder: request.paymentMethod.accountHolder || request.artistName,
+    },
   };
 
   return (
@@ -164,76 +160,165 @@ const PaymentDetailsModal = ({ request, isOpen, onClose, onStatusUpdate }: Payme
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-3">
+                      {/* Bank Name - Always show for bank payments */}
                       <div>
                         <p className="text-sm text-gray-600">Bank Name</p>
                         <div className="flex items-center gap-2">
-                          <p className="font-medium">{enhancedRequest.paymentMethod.bankName}</p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyToClipboard(enhancedRequest.paymentMethod.bankName!, "Bank name")}
-                            className="h-6 px-2"
-                          >
-                            <Copy className="w-3 h-3" />
-                          </Button>
+                          <p className="font-medium">
+                            {enhancedRequest.paymentMethod.bankName || <span className="text-gray-400 italic">Not provided</span>}
+                          </p>
+                          {hasValue(enhancedRequest.paymentMethod.bankName) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(String(enhancedRequest.paymentMethod.bankName), "Bank name")}
+                              className="h-6 px-2"
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          )}
                         </div>
-                      </div> 
+                      </div>
+
+                      {/* Account Holder - Always show for bank payments */}
                       <div>
                         <p className="text-sm text-gray-600">Account Holder</p>
                         <div className="flex items-center gap-2">
-                          <p className="font-medium">{enhancedRequest.paymentMethod.accountHolder}</p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyToClipboard(enhancedRequest.paymentMethod.accountHolder!, "Account holder")}
-                            className="h-6 px-2"
-                          >
-                            <Copy className="w-3 h-3" />
-                          </Button>
+                          <p className="font-medium">
+                            {enhancedRequest.paymentMethod.accountHolder || <span className="text-gray-400 italic">Not provided</span>}
+                          </p>
+                          {hasValue(enhancedRequest.paymentMethod.accountHolder) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(String(enhancedRequest.paymentMethod.accountHolder), "Account holder")}
+                              className="h-6 px-2"
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          )}
                         </div>
                       </div>
-                    </div>
-                    <div className="space-y-3">
+
+                      {/* Country - Always show for bank payments */}
                       <div>
-                        <p className="text-sm text-gray-600">Account Number</p>
+                        <p className="text-sm text-gray-600">Country</p>
                         <div className="flex items-center gap-2">
-                          <p className="font-mono font-medium">{enhancedRequest.paymentMethod.accountNumber}</p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyToClipboard(enhancedRequest.paymentMethod.accountNumber!, "Account number")}
-                            className="h-6 px-2"
-                          >
-                            <Copy className="w-3 h-3" />
-                          </Button>
+                          <p className="font-medium">
+                            {enhancedRequest.paymentMethod.country || <span className="text-gray-400 italic">Not provided</span>}
+                          </p>
+                          {hasValue(enhancedRequest.paymentMethod.country) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(String(enhancedRequest.paymentMethod.country), "Country")}
+                              className="h-6 px-2"
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          )}
                         </div>
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Routing Number</p>
-                        <div className="flex items-center gap-2">
-                          <p className="font-mono font-medium">{enhancedRequest.paymentMethod.routingNumber}</p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyToClipboard(enhancedRequest.paymentMethod.routingNumber!, "Routing number")}
-                            className="h-6 px-2"
-                          >
-                            <Copy className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
+
+                      {/* Account Type - Always show for bank payments */}
                       <div>
                         <p className="text-sm text-gray-600">Account Type</p>
                         <div className="flex items-center gap-2">
-                          <p className="font-mono font-medium">{enhancedRequest.paymentMethod.accountType}</p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyToClipboard(enhancedRequest.paymentMethod.accountType!, "Account type")}
-                            className="h-6 px-2"
-                          >
-                            <Copy className="w-3 h-3" />
-                          </Button>
+                          <p className="font-medium">
+                            {enhancedRequest.paymentMethod.accountType || <span className="text-gray-400 italic">Not provided</span>}
+                          </p>
+                          {hasValue(enhancedRequest.paymentMethod.accountType) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(String(enhancedRequest.paymentMethod.accountType), "Account type")}
+                              className="h-6 px-2"
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {/* Account Number - Always show for bank payments */}
+                      <div>
+                        <p className="text-sm text-gray-600">Account Number</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-mono font-medium">
+                            {enhancedRequest.paymentMethod.accountNumber || <span className="text-gray-400 italic">Not provided</span>}
+                          </p>
+                          {hasValue(enhancedRequest.paymentMethod.accountNumber) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(String(enhancedRequest.paymentMethod.accountNumber), "Account number")}
+                              className="h-6 px-2"
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Routing Number - Always show for bank payments */}
+                      <div>
+                        <p className="text-sm text-gray-600">Routing Number</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-mono font-medium">
+                            {enhancedRequest.paymentMethod.routingNumber || <span className="text-gray-400 italic">Not provided</span>}
+                          </p>
+                          {hasValue(enhancedRequest.paymentMethod.routingNumber) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(String(enhancedRequest.paymentMethod.routingNumber), "Routing number")}
+                              className="h-6 px-2"
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* IBAN - Always show for bank payments */}
+                      <div>
+                        <p className="text-sm text-gray-600">IBAN</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-mono font-medium">
+                            {enhancedRequest.paymentMethod.iban || <span className="text-gray-400 italic">Not provided</span>}
+                          </p>
+                          {hasValue(enhancedRequest.paymentMethod.iban) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(String(enhancedRequest.paymentMethod.iban), "IBAN")}
+                              className="h-6 px-2"
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Swift Code - Always show for bank payments */}
+                      <div>
+                        <p className="text-sm text-gray-600">Swift Code</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-mono font-medium">
+                            {enhancedRequest.paymentMethod.swiftCode || <span className="text-gray-400 italic">Not provided</span>}
+                          </p>
+                          {hasValue(enhancedRequest.paymentMethod.swiftCode) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(String(enhancedRequest.paymentMethod.swiftCode), "Swift code")}
+                              className="h-6 px-2"
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -241,20 +326,22 @@ const PaymentDetailsModal = ({ request, isOpen, onClose, onStatusUpdate }: Payme
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-gray-600">PayPal Email</p>
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium">{enhancedRequest.paymentMethod.paypalEmail}</p>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard(enhancedRequest.paymentMethod.paypalEmail!, "PayPal email")}
-                        className="h-6 px-2"
-                      >
-                        <Copy className="w-3 h-3" />
-                      </Button>
+                  {hasValue(enhancedRequest.paymentMethod.paypalEmail) && (
+                    <div>
+                      <p className="text-sm text-gray-600">PayPal Email</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{enhancedRequest.paymentMethod.paypalEmail}</p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(String(enhancedRequest.paymentMethod.paypalEmail), "PayPal email")}
+                          className="h-6 px-2"
+                        >
+                          <Copy className="w-3 h-3" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
             </CardContent>
