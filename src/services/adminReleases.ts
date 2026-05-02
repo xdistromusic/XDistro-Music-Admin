@@ -202,6 +202,15 @@ const normalizeRelease = (release: any): AdminRelease => {
   const trackListRaw = asArray<any>(release?.trackList ?? release?.track_list);
   const trackList = trackListRaw.map((track) => normalizeTrack(track, release));
 
+  // Extract distribution platforms from stores array or use direct field
+  const distributionPlatforms = asArray<string>(
+    release?.distributionPlatforms ??
+    release?.distribution_platforms ??
+    (asArray<any>(release?.distribution?.stores ?? release?.distribution?.['stores'])
+      .map((store: any) => store?.name || store))
+      .filter((name: string) => name && typeof name === 'string')
+  );
+
   return {
     ...release,
     primaryArtistProfiles,
@@ -210,6 +219,7 @@ const normalizeRelease = (release: any): AdminRelease => {
     tracks: Number(release?.tracks ?? trackList.length ?? 0),
     fastlane: Boolean(release?.fastlane ?? release?.fastlane_enabled ?? false),
     fastlane_purchased_at: release?.fastlane_purchased_at ?? release?.fastlanePurchasedAt ?? undefined,
+    distributionPlatforms,
   } as AdminRelease;
 };
 
@@ -229,7 +239,7 @@ const readStoredReleases = (): AdminRelease[] => {
     }
 
     // Re-seed if stored data is missing fields added in newer mock versions
-    const isStale = parsed.some((r) => r.copyrightYear === undefined || r.fastlane === undefined);
+    const isStale = parsed.some((r) => r.copyrightYear === undefined || r.fastlane === undefined || r.distributionPlatforms === undefined);
     if (isStale) {
       localStorage.setItem(ADMIN_RELEASES_KEY, JSON.stringify(mockAdminReleases));
       return mockAdminReleases;
@@ -252,16 +262,6 @@ export const getAdminReleases = async (): Promise<AdminRelease[]> => {
 
   const payload = await requestAdminJson<{ data?: AdminRelease[]; releases?: AdminRelease[] }>("/releases");
   const rawReleases = payload.data || payload.releases || [];
-  // DEBUG: log raw track data to confirm what the deployed API returns for artist profile links.
-  // Remove this log once primary/featured artist links are confirmed working.
-  const firstTrack = (rawReleases as any[])[0]?.track_list?.[0] ?? (rawReleases as any[])[0]?.trackList?.[0];
-  if (firstTrack) {
-    console.log("[admin debug] first track raw data:", JSON.stringify({
-      primaryArtistProfiles: firstTrack.primaryArtistProfiles ?? firstTrack.primary_artist_profiles,
-      featuredArtistProfiles: firstTrack.featuredArtistProfiles ?? firstTrack.featured_artist_profiles,
-      featuredArtists: firstTrack.featuredArtists ?? firstTrack.featured_artists,
-    }, null, 2));
-  }
   return normalizeReleases(rawReleases);
 };
 

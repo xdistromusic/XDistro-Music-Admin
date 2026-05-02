@@ -17,6 +17,7 @@ import {
   Check,
   X,
   AlertCircle,
+  AlertTriangle,
   Save,
   Edit,
   Hash,
@@ -848,7 +849,12 @@ const ReleaseDetailsModal = ({
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">No distribution stores selected for this release.</p>
+                <div className="flex items-center gap-2 p-3 border border-amber-200 rounded-lg bg-amber-50">
+                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+                  <p className="text-sm text-amber-700">
+                    Distribution stores not configured. This release may need distribution setup.
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>
