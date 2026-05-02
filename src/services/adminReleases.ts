@@ -61,6 +61,118 @@ const mergeArtistNames = (...groups: string[][]): string[] =>
     .map((name) => name.trim())
     .filter((name, index, all) => name.length > 0 && all.findIndex((item) => item.toLowerCase() === name.toLowerCase()) === index);
 
+const normalizeDistributionPlatforms = (release: any): string[] => {
+  const splitCsv = (value: string): string[] =>
+    value
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+
+  const normalizeValue = (value: unknown): string[] => {
+    if (Array.isArray(value)) {
+      return value.flatMap(normalizeValue);
+    }
+
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (!trimmed) return [];
+      return trimmed.includes(",") ? splitCsv(trimmed) : [trimmed];
+    }
+
+    if (typeof value === "number") {
+      return [String(value)];
+    }
+
+    if (!value || typeof value !== "object") {
+      return [];
+    }
+
+    const record = value as Record<string, unknown>;
+
+    const preferredLabel = String(
+      record.name ??
+        record.storeName ??
+        record.store_name ??
+        record.title ??
+        record.platform ??
+        record.platformName ??
+        record.platform_name ??
+        record.display_name ??
+        ""
+    ).trim();
+    if (preferredLabel) return [preferredLabel];
+
+    const nestedCandidates: unknown[] = [
+      record.store,
+      record.stores,
+      record.store_info,
+      record.storeInfo,
+      record.platform_info,
+      record.platformInfo,
+      record.channel,
+      record.distribution,
+    ];
+    for (const nested of nestedCandidates) {
+      const normalizedNested = normalizeValue(nested);
+      if (normalizedNested.length > 0) return normalizedNested;
+    }
+
+    const idFallback = String(
+      record.id ??
+        record.store_id ??
+        record.storeId ??
+        record.platform_id ??
+        record.platformId ??
+        record.code ??
+        ""
+    ).trim();
+    if (idFallback) return [idFallback];
+
+    return [];
+  };
+
+  const candidates: unknown[] = [
+    release?.distributionPlatforms,
+    release?.distribution_platforms,
+    release?.selectedStores,
+    release?.selected_stores,
+    release?.stores,
+    release?.store_ids,
+    release?.storeIds,
+    release?.platforms,
+    release?.dsp_links,
+    release?.release_stores,
+    release?.releaseStores,
+    release?.distribution,
+    release?.distribution?.stores,
+    release?.distribution?.selected_stores,
+    release?.distribution?.selectedStores,
+    release?.distribution?.store_ids,
+    release?.distribution?.storeIds,
+    release?.distribution?.platforms,
+    release?.distribution?.dsp_links,
+  ];
+  const recursiveCandidates = (value: unknown, depth = 0): unknown[] => {
+    if (depth > 5 || value == null) return [];
+    if (Array.isArray(value)) {
+      return value.flatMap((item) => recursiveCandidates(item, depth + 1));
+    }
+    if (typeof value !== "object") return [];
+
+    const record = value as Record<string, unknown>;
+    const collected: unknown[] = [];
+    Object.entries(record).forEach(([key, nested]) => {
+      if (/(store|platform|distribution|dsp)/i.test(key)) {
+        collected.push(nested);
+      }
+      collected.push(...recursiveCandidates(nested, depth + 1));
+    });
+    return collected;
+  };
+
+  return mergeArtistNames(...candidates.concat(recursiveCandidates(release)).map(normalizeValue));
+};
+
 const buildProfilesFromParallelFields = (namesValue: unknown, urlsValue: unknown) => {
   const names = normalizeArtistNames(namesValue);
   const urls = asArray<unknown>(urlsValue).map((value) => String(value ?? "").trim());
@@ -202,14 +314,7 @@ const normalizeRelease = (release: any): AdminRelease => {
   const trackListRaw = asArray<any>(release?.trackList ?? release?.track_list);
   const trackList = trackListRaw.map((track) => normalizeTrack(track, release));
 
-  // Extract distribution platforms from stores array or use direct field
-  const distributionPlatforms = asArray<string>(
-    release?.distributionPlatforms ??
-    release?.distribution_platforms ??
-    (asArray<any>(release?.distribution?.stores ?? release?.distribution?.['stores'])
-      .map((store: any) => store?.name || store))
-      .filter((name: string) => name && typeof name === 'string')
-  );
+  const distributionPlatforms = normalizeDistributionPlatforms(release);
 
   return {
     ...release,
@@ -263,6 +368,46 @@ export const getAdminReleases = async (): Promise<AdminRelease[]> => {
   const payload = await requestAdminJson<{ data?: AdminRelease[]; releases?: AdminRelease[] }>("/releases");
   const rawReleases = payload.data || payload.releases || [];
   return normalizeReleases(rawReleases);
+};
+
+export const getAdminReleaseById = async (releaseId: AdminRelease["id"]): Promise<AdminRelease> => {
+  if (isAdminDataDummyEnabled()) {
+    const release = readStoredReleases().find((item) => item.id === releaseId);
+    if (!release) {
+      throw new Error("Release not found");
+    }
+    return release;
+  }
+
+  const payload = await requestAdminJson<{ data?: AdminRelease; release?: AdminRelease }>(`/releases/${releaseId}`);
+  const rawRelease = payload.data ?? payload.release;
+  if (!rawRelease) {
+    throw new Error("Release not found");
+  }
+
+  const normalized = normalizeRelease(rawRelease);
+  if (normalized.distributionPlatforms && normalized.distributionPlatforms.length > 0) {
+    return normalized;
+  }
+
+  const tryPaths = [`/releases/${releaseId}/distribution`, `/releases/${releaseId}/stores`];
+  for (const path of tryPaths) {
+    try {
+      const extraPayload = await requestAdminJson<any>(path);
+      const extraData = extraPayload?.data ?? extraPayload;
+      const extraPlatforms = normalizeDistributionPlatforms(extraData);
+      if (extraPlatforms.length > 0) {
+        return {
+          ...normalized,
+          distributionPlatforms: extraPlatforms,
+        };
+      }
+    } catch {
+      // Ignore missing endpoint and try the next fallback.
+    }
+  }
+
+  return normalized;
 };
 
 export const updateAdminReleaseStatus = async (

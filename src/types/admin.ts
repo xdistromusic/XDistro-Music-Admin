@@ -125,6 +125,7 @@ export interface AdminRelease {
   trackList?: AdminReleaseTrack[];
   fastlane?: boolean;
   fastlane_purchased_at?: string;
+  distributionPlatforms?: string[];
 }
 
 export interface AdminArtist {

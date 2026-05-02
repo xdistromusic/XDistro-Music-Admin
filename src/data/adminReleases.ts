@@ -20,6 +20,7 @@ export const mockAdminReleases: AdminRelease[] = [
     copyright: "John Doe",
     copyrightYear: "2024",
     language: "English",
+    distributionPlatforms: ["Spotify", "Apple Music", "YouTube Music"],
     trackList: [
       {
         id: 1,
@@ -53,6 +54,7 @@ export const mockAdminReleases: AdminRelease[] = [
     copyright: "Jane Smith",
     copyrightYear: "2024",
     language: "English",
+    distributionPlatforms: ["Spotify", "Apple Music", "Deezer", "Tidal"],
     trackList: [
       {
         id: 1,

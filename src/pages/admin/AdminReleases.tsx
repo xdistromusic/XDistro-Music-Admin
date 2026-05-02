@@ -11,6 +11,7 @@ import AdminPageLoader from "@/components/admin/AdminPageLoader";
 import ReleaseDetailsModal from "@/components/admin/ReleaseDetailsModal";
 import {
   useAdminReleases,
+  useAdminReleaseById,
   useUpdateAdminReleaseStatus,
   useUpdateAdminReleaseUpc,
   useUpdateAdminTrackIsrc,
@@ -40,6 +41,7 @@ const AdminReleases = () => {
   const [rejectionReason, setRejectionReason] = useState("");
 
   const { data: releases = [], isLoading } = useAdminReleases();
+  const { data: selectedReleaseDetails } = useAdminReleaseById(isModalOpen ? selectedReleaseId : null);
   const updateStatusMutation = useUpdateAdminReleaseStatus();
   const updateUpcMutation = useUpdateAdminReleaseUpc();
   const updateIsrcMutation = useUpdateAdminTrackIsrc();
@@ -69,8 +71,9 @@ const AdminReleases = () => {
     setCurrentPage(1);
   }, [searchQuery, filterStatus]);
 
-  const selectedRelease =
+  const selectedReleaseFromList =
     releases.find((release) => release.id === selectedReleaseId) || null;
+  const selectedRelease = selectedReleaseDetails ?? selectedReleaseFromList;
 
   const goToPage = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));

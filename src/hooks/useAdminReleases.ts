@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getAdminReleases,
+  getAdminReleaseById,
   updateAdminReleaseStatus,
   updateAdminReleaseUpc,
   updateAdminTrackIsrc,
@@ -14,6 +15,15 @@ export const useAdminReleases = () => {
   return useQuery({
     queryKey: adminReleasesQueryKey,
     queryFn: getAdminReleases,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useAdminReleaseById = (releaseId: AdminEntityId | null) => {
+  return useQuery({
+    queryKey: ["admin", "releases", "detail", releaseId],
+    queryFn: () => getAdminReleaseById(releaseId as AdminEntityId),
+    enabled: releaseId !== null,
     refetchOnWindowFocus: false,
   });
 };

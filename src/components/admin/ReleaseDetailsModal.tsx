@@ -17,7 +17,6 @@ import {
   Check,
   X,
   AlertCircle,
-  AlertTriangle,
   Save,
   Edit,
   Hash,
@@ -151,7 +150,73 @@ const ReleaseDetailsModal = ({
     audioFile: track.audioFile || `https://example.com/audio/${release.id}/${track.title.replace(/\s+/g, '_').toLowerCase()}.mp3`
   }));
 
-  const selectedPlatforms = release.distributionPlatforms ?? [];
+  const selectedPlatforms = (() => {
+    const splitCsv = (value: string) =>
+      value
+        .split(",")
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0);
+
+    const normalizeValues = (value: unknown): string[] => {
+      if (Array.isArray(value)) {
+        return value.flatMap(normalizeValues);
+      }
+
+      if (typeof value === "string") {
+        const trimmed = value.trim();
+        if (!trimmed) return [];
+        return trimmed.includes(",") ? splitCsv(trimmed) : [trimmed];
+      }
+
+      if (typeof value === "number") {
+        return [String(value)];
+      }
+
+      if (!value || typeof value !== "object") {
+        return [];
+      }
+
+      const record = value as Record<string, unknown>;
+      const label = String(
+        record.name ??
+          record.storeName ??
+          record.store_name ??
+          record.platform ??
+          record.platformName ??
+          record.platform_name ??
+          record.title ??
+          ""
+      ).trim();
+      if (label) return [label];
+
+      return normalizeValues(
+        record.store ??
+          record.stores ??
+          record.distribution ??
+          record.platformInfo ??
+          record.platform_info ??
+          null
+      );
+    };
+
+    const releaseAny = release as Release & Record<string, unknown>;
+    const candidates: unknown[] = [
+      releaseAny.distributionPlatforms,
+      releaseAny.distribution_platforms,
+      releaseAny.selectedStores,
+      releaseAny.selected_stores,
+      releaseAny.release_stores,
+      releaseAny.releaseStores,
+      releaseAny.stores,
+      releaseAny.platforms,
+      releaseAny.distribution,
+      (releaseAny.distribution as Record<string, unknown> | undefined)?.stores,
+      (releaseAny.distribution as Record<string, unknown> | undefined)?.selected_stores,
+      (releaseAny.distribution as Record<string, unknown> | undefined)?.selectedStores,
+    ];
+
+    return Array.from(new Set(candidates.flatMap(normalizeValues)));
+  })();
   const releasePrimaryArtistProfileUrl = normalizeExternalUrl(
     release.primaryArtistProfiles?.find((profile) => profile.name === release.artist)?.profileUrl
       ?? release.primaryArtistProfiles?.[0]?.profileUrl
@@ -849,12 +914,7 @@ const ReleaseDetailsModal = ({
                   ))}
                 </div>
               ) : (
-                <div className="flex items-center gap-2 p-3 border border-amber-200 rounded-lg bg-amber-50">
-                  <AlertTriangle className="w-4 h-4 text-amber-600" />
-                  <p className="text-sm text-amber-700">
-                    Distribution stores not configured. This release may need distribution setup.
-                  </p>
-                </div>
+                <p className="text-sm text-gray-500">No distribution stores selected for this release.</p>
               )}
             </CardContent>
           </Card>
