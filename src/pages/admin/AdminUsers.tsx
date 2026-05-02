@@ -32,7 +32,7 @@ const formatShortEmail = (email: string) => {
     return "";
   }
 
-  return email.length <= 26 ? email : `${email.slice(0, 26)}...`;
+  return email.length <= 10 ? email : `${email.slice(0, 10)}...`;
 };
 
 const AdminUsers = () => {
@@ -236,26 +236,17 @@ const AdminUsers = () => {
               <table className="w-full table-fixed">
                 <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
                   <tr>
-                    <th className="w-[22%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[14%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       User
                     </th>
-                    <th className="w-[26%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="w-[16%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[10%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Country
                     </th>
-                    <th className="w-[14%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[10%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Plan
                     </th>
-                    <th className="w-[12%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[8%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
-                    </th>
-                    <th className="w-[10%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Activity
-                    </th>
-                    <th className="w-[7%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Earnings
                     </th>
                     <th className="w-[3%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
@@ -277,14 +268,8 @@ const AdminUsers = () => {
                             <div className="text-sm font-medium text-gray-900 truncate" title={`${user.firstName} ${user.lastName}`}>
                               {user.firstName} {user.lastName}
                             </div>
-                            <div className="text-xs text-gray-500" title={user.id}>ID: {formatShortUserId(user.id)}</div>
+                            <div className="text-xs text-gray-500" title={user.email}>EMAIL: {formatShortEmail(user.email)}</div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-2 py-3 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 flex items-center min-w-0">
-                          <Mail className="w-4 h-4 mr-1 text-gray-400 shrink-0" />
-                          <span className="truncate" title={user.email}>{formatShortEmail(user.email)}</span>
                         </div>
                       </td>
                       <td className="px-2 py-3 whitespace-nowrap">
@@ -314,13 +299,6 @@ const AdminUsers = () => {
                         >
                           {user.status ?? "Active"}
                         </span>
-                      </td>
-                      <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">
-                        <div>{user.releases} releases</div>
-                        <div className="text-xs text-gray-500 truncate" title={`Last login: ${user.lastLogin}`}>{user.lastLogin}</div>
-                      </td>
-                      <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">
-                        <div className="font-medium">${user.totalEarnings.toFixed(2)}</div>
                       </td>
                       <td className="px-2 py-3 whitespace-nowrap text-sm font-medium">
                         <div className="flex justify-start">
