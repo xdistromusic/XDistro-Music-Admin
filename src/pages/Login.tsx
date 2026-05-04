@@ -67,7 +67,7 @@ const Login = () => {
         <div className="w-full max-w-2xl">
           <div className="bg-onerpm-gray-dark/80 backdrop-blur-sm shadow-xl rounded p-8 border border-white/10">
             <div className="text-center mb-8"> 
-              <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
+              <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
               <p className="text-white/70 mt-2">
                 Sign in to your admin dashboard
               </p>
@@ -126,27 +126,6 @@ const Login = () => {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="rememberMe"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          className="data-[state=checked]:bg-onerpm-orange border-white/30"
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel className="text-sm font-medium text-white/80">
-                          Remember me
-                        </FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
                 <Button
                   type="submit"
                   disabled={isSubmitting}
@@ -163,7 +142,7 @@ const Login = () => {
               </form>
             </Form>
             <div className="mt-8 text-center mb-4">
-              <p className="text-white/70">Don't have an account? Please contact the system administrator.</p>
+              <p className="text-white/70">This is a secure admin area. All login attempts are logged.</p>
             </div>
           </div>
         </div>
